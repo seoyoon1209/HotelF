@@ -1,3 +1,4 @@
+// 라우트 정의 전용 파일. 새 페이지 컴포넌트를 만들면 여기에 import + <Route>만 추가하면 된다.
 import { Routes, Route } from "react-router-dom";
 
 import HotelList from "src/components/hotel/HotelList";

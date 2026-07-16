@@ -1,3 +1,4 @@
+/* 전역 스타일 진입점. Tailwind 디렉티브 아래에 커스텀 전역 CSS를 추가하면 된다. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
