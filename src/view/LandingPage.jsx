@@ -13,7 +13,14 @@ const AI_FLOW = [
 ];
 
 // "Hoteling" = Hotel + Scheduling — the name behind the product.
-const TITLE_LINES = ["Hoteling", "Hotel + Scheduling, powered by AI"];
+// 둘째 줄은 태그라인이라 따로 더 작은 크기를 줘서, 긴 문장이 브랜드명 크기로 밀려 넘치지 않게 한다.
+const TITLE_LINES = [
+  { text: "Hoteling" },
+  {
+    text: "Hotel + Scheduling, powered by AI",
+    className: "mt-2 text-xl font-semibold tracking-normal text-slate-500 sm:text-2xl",
+  },
+];
 const CHAR_DELAY_MS = 45;
 
 // 제목을 한 글자씩 순서대로 나타내기 위해, 줄바꿈을 포함한 전체 글자에 순번을 매긴다.
@@ -23,8 +30,8 @@ function TypingTitle({ lines }) {
   return (
     <>
       {lines.map((line, lineIndex) => (
-        <span key={lineIndex} className="block">
-          {[...line].map((char, i) => {
+        <span key={lineIndex} className={`block ${line.className ?? ""}`}>
+          {[...line.text].map((char, i) => {
             const delay = charIndex * CHAR_DELAY_MS;
             charIndex += 1;
             return (
