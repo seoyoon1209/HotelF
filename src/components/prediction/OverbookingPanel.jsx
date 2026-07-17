@@ -1,6 +1,4 @@
-// 오버부킹 지원 페이지. 앞으로 30일간 체크인 날짜별 예상 취소량을 보여주고,
-// 그만큼 추가로 예약을 받아도 되는지 추천값(recommended_additional_bookings)을 제시한다.
-// 실제 오버부킹 확정은 이 화면에서 자동 실행되지 않고 참고용/직원 판단용이다.
+// 오버부킹 지원 페이지(직원 판단용 )
 import { useEffect, useState } from "react";
 import { getOverbookingSummary } from "src/api/overbookingApi";
 
@@ -19,7 +17,7 @@ function OverbookingPanel() {
         판단은 직원이 합니다.
       </p>
 
-      {/* 모바일: 카드 목록, 데스크톱(sm 이상): 표 */}
+      {/* 모바일: 카드 목록 */}
       <div className="mt-5 space-y-3 sm:hidden">
         {summary.map((day) => (
           <div

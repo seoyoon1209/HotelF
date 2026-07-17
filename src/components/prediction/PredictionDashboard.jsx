@@ -1,5 +1,4 @@
-// 홈("/") 화면. 예약별 최신 취소 예측 결과(위험도 요약 + 고위험 예약 목록)를 보여준다.
-// GET /api/reservations/가 이미 최신 예측(risk_level)을 같이 내려주므로 추가 요청 없이 계산한다.
+// 예약별 최신 취소 예측 결과(위험도 요약 + 고위험 예약 목록)
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getReservations } from "src/api/reservationApi";

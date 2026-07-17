@@ -1,5 +1,4 @@
-// 예약 목록 페이지. 다른 목록 페이지(HotelList, CustomerList)도 이 패턴을 따름.
-// GET /api/reservations/가 최신 예측(risk_level)까지 같이 내려주므로 위험도 배지를 붙인다.
+// 예약 목록 페이지.
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getReservations } from "src/api/reservationApi";
@@ -16,7 +15,6 @@ function ReservationList() {
     <div>
       <h1 className="text-2xl font-semibold text-slate-900">예약 목록</h1>
 
-      {/* 모바일: 카드 목록, 데스크톱: 표 */}
       <div className="mt-5 space-y-2 sm:hidden">
         {reservations.map((reservation) => (
           <Link

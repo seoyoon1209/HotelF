@@ -1,6 +1,4 @@
-// 취소 위험도 배지. DB의 risk_level(LOW/MEDIUM/HIGH/CRITICAL)을 기획 문서 기준
-// 3단계(낮음/보통/높음) 표시로 매핑한다. HIGH와 CRITICAL은 같은 "높음" 라벨이지만
-// 색으로만 구분(주황/빨강).
+// 취소 위험도 배지.
 const RISK_STYLE = {
   LOW: { label: "낮음", className: "bg-green-50 text-green-700 ring-green-600/20", dot: "bg-green-500" },
   MEDIUM: {

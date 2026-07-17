@@ -1,7 +1,4 @@
-// 예약 상세 페이지 (/reservations/:reservationId).
-// 예약 정보 + 취소 예측 이력을 보여주고, 고위험(HIGH/CRITICAL) 예약이면
-// "선제적 고객 관리" 제안(재확인 연락/일정 변경/업그레이드)을 노출한다.
-// 버튼은 실제 연락/변경을 실행하지 않는다 — 직원이 눌러서 "처리 표시"만 하는 체크리스트다.
+// 예약 상세 페이지예약 정보 + 취소 예측 이력
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getReservationById } from "src/api/reservationApi";
