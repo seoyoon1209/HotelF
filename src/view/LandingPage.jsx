@@ -1,4 +1,7 @@
 // 시스템 소개. toss.im 참고 — 밝은 배경 + 큼직한 볼드 타이포 + 스크롤 리빌 섹션 구성.
+// 데모 브랜치: 실제 서비스(대시보드 등)는 아직 공개하지 않아 "실제 서비스 들어가기" 버튼은
+// 이동하지 않고 "아직 준비 중입니다" 안내만 보여준다. AI 데모 버튼만 실제로 이동한다.
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaHotel, FaChartLine, FaRobot, FaUserTie, FaUser, FaBriefcase } from "react-icons/fa6";
 import Reveal from "src/components/common/Reveal";
@@ -63,6 +66,27 @@ const ROADMAP = [
   },
 ];
 
+// "실제 서비스 들어가기" 버튼. 아직 실제 서비스를 공개하지 않는 데모 브랜치라 이동 대신
+// "아직 준비 중입니다" 안내만 보여준다.
+function ComingSoonButton({ className, label = "실제 서비스 들어가기" }) {
+  const [clicked, setClicked] = useState(false);
+
+  if (clicked) {
+    return (
+      <span className={`flex items-center justify-center gap-2 text-slate-400 ${className}`}>
+        아직 준비 중입니다
+      </span>
+    );
+  }
+
+  return (
+    <button onClick={() => setClicked(true)} className={className}>
+      <FaChartLine className="h-5 w-5" />
+      {label}
+    </button>
+  );
+}
+
 function LandingPage() {
   return (
     <div className="bg-white text-slate-900">
@@ -85,13 +109,7 @@ function LandingPage() {
         </p>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-          <Link
-            to="/dashboard"
-            className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-brand-dark"
-          >
-            <FaChartLine className="h-5 w-5" />
-            실제 서비스 들어가기
-          </Link>
+          <ComingSoonButton className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-brand-dark" />
           <Link
             to="/demo"
             className="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:bg-slate-200"
@@ -197,13 +215,10 @@ function LandingPage() {
             "예약 데이터를 활용해 고객의 취소 가능성을 사전에 예측하고, 적절한 고객 관리와 객실
             재판매 전략을 통해 호텔의 점유율과 매출을 높이는 의사결정 지원 서비스"
           </blockquote>
-          <Link
-            to="/dashboard"
+          <ComingSoonButton
+            label="지금 시작하기"
             className="mt-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-brand-dark"
-          >
-            <FaChartLine className="h-5 w-5" />
-            지금 시작하기
-          </Link>
+          />
         </Reveal>
       </section>
     </div>
