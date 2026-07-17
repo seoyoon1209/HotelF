@@ -1,6 +1,6 @@
 // 호텔 목록 페이지.
 function HotelList() {
-  return <div>호텔 목록</div>;
+  return <div>Hotels</div>;
 }
 
 export default HotelList;

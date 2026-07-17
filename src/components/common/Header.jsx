@@ -9,7 +9,7 @@ function Header() {
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link to="/" className="flex items-center gap-2 text-lg font-semibold text-slate-900">
           <FaHotel className="h-5 w-5 text-slate-700" />
-          호텔 예약 취소 예측
+          Hotel Cancellation Prediction
         </Link>
         <nav className="flex flex-wrap gap-1">
           {NAV_ITEMS.map((item) => (

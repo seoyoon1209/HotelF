@@ -24,25 +24,25 @@ function PredictionDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">취소 예측 대시보드</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">Cancellation Prediction Dashboard</h1>
       <p className="mt-1 text-sm text-slate-500">
-        아래 위험도는 참고용 예측치입니다 (모델 정확도 약 78% 수준).
+        Risk levels below are reference predictions only (model accuracy ~78%).
       </p>
 
       <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="낮음" count={counts.LOW} icon={FaCircleCheck} color="#0ca30c" />
-        <StatCard label="보통" count={counts.MEDIUM} icon={FaCircleExclamation} color="#fab219" />
+        <StatCard label="Low" count={counts.LOW} icon={FaCircleCheck} color="#0ca30c" />
+        <StatCard label="Medium" count={counts.MEDIUM} icon={FaCircleExclamation} color="#fab219" />
         <StatCard
-          label="높음"
+          label="High"
           count={counts.HIGH + counts.CRITICAL}
           icon={FaTriangleExclamation}
           color="#d03b3b"
         />
-        <StatCard label="예측 없음" count={counts.none} icon={FaCircleQuestion} color="#898781" />
+        <StatCard label="No prediction" count={counts.none} icon={FaCircleQuestion} color="#898781" />
       </div>
 
       <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="font-semibold text-slate-900">위험도 구성</h2>
+        <h2 className="font-semibold text-slate-900">Risk Distribution</h2>
         <div className="mt-4">
           <RiskDistributionBar counts={counts} />
         </div>
@@ -50,13 +50,14 @@ function PredictionDashboard() {
 
       <div className="mt-8 flex items-center justify-between">
         <h2 className="font-semibold text-slate-900">
-          고위험 예약 <span className="text-slate-400">({highRiskReservations.length}건)</span>
+          High-Risk Reservations{" "}
+          <span className="text-slate-400">({highRiskReservations.length})</span>
         </h2>
         <Link
           to="/overbooking"
           className="text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline"
         >
-          오버부킹 지원 보기 →
+          View overbooking support →
         </Link>
       </div>
       <ul className="mt-3 space-y-2">
@@ -68,7 +69,7 @@ function PredictionDashboard() {
             >
               <div>
                 <div className="font-medium text-slate-900">{reservation.reservation_code}</div>
-                <div className="text-sm text-slate-500">체크인 {reservation.check_in_date}</div>
+                <div className="text-sm text-slate-500">Check-in {reservation.check_in_date}</div>
               </div>
               <RiskBadge riskLevel={reservation.risk_level} />
             </Link>
@@ -76,7 +77,7 @@ function PredictionDashboard() {
         ))}
         {highRiskReservations.length === 0 && (
           <li className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-            현재 고위험 예약이 없습니다.
+            No high-risk reservations right now.
           </li>
         )}
       </ul>

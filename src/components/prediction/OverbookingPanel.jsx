@@ -11,10 +11,10 @@ function OverbookingPanel() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">오버부킹 지원</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">Overbooking Support</h1>
       <p className="mt-1 text-sm text-slate-500">
-        날짜별 예상 취소 건수를 기준으로 추가 예약 허용 범위를 추천합니다. 참고용 수치이며 최종
-        판단은 직원이 합니다.
+        Recommends how many additional bookings to accept per date, based on expected
+        cancellations. Reference figures only — final judgment is up to staff.
       </p>
 
       {/* 모바일: 카드 목록 */}
@@ -26,20 +26,20 @@ function OverbookingPanel() {
           >
             <div className="flex items-center justify-between">
               <span className="font-medium text-slate-900">{day.check_in_date}</span>
-              <span className="text-sm text-slate-500">예약 {day.total_reservations}건</span>
+              <span className="text-sm text-slate-500">{day.total_reservations} reservations</span>
             </div>
             <div className="mt-1.5 text-sm text-slate-600">
-              예상 취소 {Number(day.expected_cancellations).toFixed(1)}건 (고위험{" "}
-              {day.high_risk_count}건)
+              Expected cancellations {Number(day.expected_cancellations).toFixed(1)} (high risk{" "}
+              {day.high_risk_count})
             </div>
             <div className="mt-2 inline-block rounded-full bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-700">
-              추가 예약 추천 {day.recommended_additional_bookings}건
+              Recommended additional bookings: {day.recommended_additional_bookings}
             </div>
           </div>
         ))}
         {summary.length === 0 && (
           <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-            표시할 데이터가 없습니다.
+            No data to display.
           </div>
         )}
       </div>
@@ -48,11 +48,11 @@ function OverbookingPanel() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-slate-500">
-              <th className="px-4 py-3 font-medium">체크인 날짜</th>
-              <th className="px-4 py-3 font-medium">예약 건수</th>
-              <th className="px-4 py-3 font-medium">예상 취소 건수</th>
-              <th className="px-4 py-3 font-medium">고위험 건수</th>
-              <th className="px-4 py-3 font-medium">추가 예약 추천</th>
+              <th className="px-4 py-3 font-medium">Check-in Date</th>
+              <th className="px-4 py-3 font-medium">Reservations</th>
+              <th className="px-4 py-3 font-medium">Expected Cancellations</th>
+              <th className="px-4 py-3 font-medium">High Risk Count</th>
+              <th className="px-4 py-3 font-medium">Recommended Additional Bookings</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -74,7 +74,7 @@ function OverbookingPanel() {
             {summary.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                  표시할 데이터가 없습니다.
+                  No data to display.
                 </td>
               </tr>
             )}

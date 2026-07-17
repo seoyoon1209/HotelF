@@ -13,7 +13,7 @@ function ReservationList() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">예약 목록</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">Reservations</h1>
 
       <div className="mt-5 space-y-2 sm:hidden">
         {reservations.map((reservation) => (
@@ -31,7 +31,7 @@ function ReservationList() {
         ))}
         {reservations.length === 0 && (
           <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-            예약이 없습니다.
+            No reservations.
           </div>
         )}
       </div>
@@ -40,11 +40,11 @@ function ReservationList() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-slate-500">
-              <th className="px-4 py-3 font-medium">예약번호</th>
-              <th className="px-4 py-3 font-medium">체크인</th>
-              <th className="px-4 py-3 font-medium">체크아웃</th>
-              <th className="px-4 py-3 font-medium">상태</th>
-              <th className="px-4 py-3 font-medium">취소 위험도</th>
+              <th className="px-4 py-3 font-medium">Reservation No.</th>
+              <th className="px-4 py-3 font-medium">Check-in</th>
+              <th className="px-4 py-3 font-medium">Check-out</th>
+              <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Cancellation Risk</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -69,7 +69,7 @@ function ReservationList() {
             {reservations.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-8 text-center text-slate-500">
-                  예약이 없습니다.
+                  No reservations.
                 </td>
               </tr>
             )}
