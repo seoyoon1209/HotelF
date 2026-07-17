@@ -22,7 +22,7 @@ function OverbookingPanel() {
         {summary.map((day) => (
           <div
             key={day.check_in_date}
-            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            className="rounded-xl border border-slate-200 bg-white p-4"
           >
             <div className="flex items-center justify-between">
               <span className="font-medium text-slate-900">{day.check_in_date}</span>
@@ -44,7 +44,7 @@ function OverbookingPanel() {
         )}
       </div>
 
-      <div className="mt-5 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:block">
+      <div className="mt-5 hidden overflow-hidden rounded-xl border border-slate-200 bg-white sm:block">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-slate-500">

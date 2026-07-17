@@ -20,7 +20,7 @@ function ReservationList() {
           <Link
             key={reservation.reservation_id}
             to={`/reservations/${reservation.reservation_id}`}
-            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+            className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-400"
           >
             <div>
               <div className="font-medium text-slate-900">{reservation.reservation_code}</div>
@@ -36,7 +36,7 @@ function ReservationList() {
         )}
       </div>
 
-      <div className="mt-5 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:block">
+      <div className="mt-5 hidden overflow-hidden rounded-xl border border-slate-200 bg-white sm:block">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-slate-500">

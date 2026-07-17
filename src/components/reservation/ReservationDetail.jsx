@@ -40,7 +40,7 @@ function ReservationDetail() {
         취소 위험도는 참고용 예측치입니다 (모델 정확도 약 78% 수준).
       </p>
 
-      <div className="mt-5 grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-white p-5 text-sm shadow-sm sm:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-white p-5 text-sm sm:grid-cols-4">
         <div>
           <div className="text-slate-500">상태</div>
           <div className="mt-0.5 font-medium text-slate-900">{reservation.reservation_status}</div>
@@ -64,7 +64,7 @@ function ReservationDetail() {
       </div>
 
       {isHighRisk && (
-        <div className="mt-5 rounded-xl border border-orange-200 bg-orange-50 p-5 shadow-sm">
+        <div className="mt-5 rounded-xl border border-orange-200 bg-orange-50 p-5">
           <h2 className="font-semibold text-orange-900">선제적 고객 관리 제안</h2>
           <p className="mt-1 text-sm text-orange-800">
             취소 위험도가 높은 예약입니다. 아래 조치 중 진행한 항목을 체크하세요.
@@ -98,7 +98,7 @@ function ReservationDetail() {
         {predictions.map((prediction) => (
           <li
             key={prediction.prediction_id}
-            className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-2.5 shadow-sm"
+            className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-2.5"
           >
             <span className="text-slate-500">
               {new Date(prediction.predicted_at).toLocaleString()}

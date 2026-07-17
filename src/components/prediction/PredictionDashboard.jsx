@@ -1,8 +1,11 @@
-// 예약별 최신 취소 예측 결과(위험도 요약 + 고위험 예약 목록)
+// 예약별 최신 취소 예측 결과(위험도 요약 + 위험도 구성비 + 고위험 예약 목록)
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FaCircleCheck, FaCircleExclamation, FaTriangleExclamation, FaCircleQuestion } from "react-icons/fa6";
 import { getReservations } from "src/api/reservationApi";
 import RiskBadge from "src/components/common/RiskBadge";
+import RiskDistributionBar from "src/components/common/RiskDistributionBar";
+import StatCard from "src/components/common/StatCard";
 
 function PredictionDashboard() {
   const [reservations, setReservations] = useState([]);
@@ -26,16 +29,23 @@ function PredictionDashboard() {
         아래 위험도는 참고용 예측치입니다 (모델 정확도 약 78% 수준).
       </p>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <SummaryCard label="낮음" count={counts.LOW} dot="bg-green-500" />
-        <SummaryCard label="보통" count={counts.MEDIUM} dot="bg-yellow-500" />
-        <SummaryCard
+      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="낮음" count={counts.LOW} icon={FaCircleCheck} color="#0ca30c" />
+        <StatCard label="보통" count={counts.MEDIUM} icon={FaCircleExclamation} color="#fab219" />
+        <StatCard
           label="높음"
           count={counts.HIGH + counts.CRITICAL}
-          dot="bg-red-500"
-          highlight
+          icon={FaTriangleExclamation}
+          color="#d03b3b"
         />
-        <SummaryCard label="예측 없음" count={counts.none} dot="bg-gray-400" />
+        <StatCard label="예측 없음" count={counts.none} icon={FaCircleQuestion} color="#898781" />
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+        <h2 className="font-semibold text-slate-900">위험도 구성</h2>
+        <div className="mt-4">
+          <RiskDistributionBar counts={counts} />
+        </div>
       </div>
 
       <div className="mt-8 flex items-center justify-between">
@@ -54,7 +64,7 @@ function PredictionDashboard() {
           <li key={reservation.reservation_id}>
             <Link
               to={`/reservations/${reservation.reservation_id}`}
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-400"
             >
               <div>
                 <div className="font-medium text-slate-900">{reservation.reservation_code}</div>
@@ -70,22 +80,6 @@ function PredictionDashboard() {
           </li>
         )}
       </ul>
-    </div>
-  );
-}
-
-function SummaryCard({ label, count, dot, highlight = false }) {
-  return (
-    <div
-      className={`rounded-xl border p-4 shadow-sm ${
-        highlight ? "border-red-200 bg-red-50" : "border-slate-200 bg-white"
-      }`}
-    >
-      <div className="flex items-center gap-1.5 text-sm text-slate-500">
-        <span className={`h-2 w-2 rounded-full ${dot}`} />
-        {label}
-      </div>
-      <div className="mt-1.5 text-3xl font-semibold text-slate-900">{count}</div>
     </div>
   );
 }
