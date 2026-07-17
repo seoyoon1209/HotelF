@@ -12,7 +12,8 @@ const AI_FLOW = [
   "Staff reviews and takes action",
 ];
 
-const TITLE_LINES = ["Hotel cancellations,", "predicted before they happen"];
+// "Hoteling" = Hotel + Scheduling — the name behind the product.
+const TITLE_LINES = ["Hoteling", "Hotel + Scheduling, powered by AI"];
 const CHAR_DELAY_MS = 45;
 
 // 제목을 한 글자씩 순서대로 나타내기 위해, 줄바꿈을 포함한 전체 글자에 순번을 매긴다.
@@ -119,7 +120,7 @@ function LandingPage() {
         </h1>
 
         {/* 마지막 글자가 다 나타난 뒤 자동으로 나타남 */}
-        <p className="mt-7 max-w-2xl animate-fade-in-up text-xl leading-relaxed text-slate-500 [animation-delay:2.6s] sm:text-2xl">
+        <p className="mt-7 max-w-2xl animate-fade-in-up text-xl leading-relaxed text-slate-500 [animation-delay:2.2s] sm:text-2xl">
           Using reservation data to predict cancellation likelihood ahead of time, so hotels can
           manage guests proactively and resell rooms strategically to boost occupancy and revenue.
         </p>

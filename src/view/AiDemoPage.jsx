@@ -9,9 +9,6 @@ import {
   FaWandMagicSparkles,
   FaMagnifyingGlassChart,
   FaLightbulb,
-  FaCheck,
-  FaXmark,
-  FaPen,
   FaArrowTrendUp,
 } from "react-icons/fa6";
 import RiskBadge from "src/components/common/RiskBadge";
@@ -97,7 +94,6 @@ const MODEL_ACCURACY = 0.78; // 기획서 기준 모델 정확도
 
 function AiDemoPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [decision, setDecision] = useState(null); // "approved" | "rejected" | null
   const selected = SAMPLE_RESERVATIONS[selectedIndex];
 
   const counts = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0, none: 0 };
@@ -109,11 +105,6 @@ function AiDemoPage() {
       SAMPLE_RESERVATIONS.length) *
       100
   );
-
-  const select = (index) => {
-    setSelectedIndex(index);
-    setDecision(null);
-  };
 
   return (
     <div>
@@ -182,7 +173,7 @@ function AiDemoPage() {
                 {SAMPLE_RESERVATIONS.map((r, index) => (
                   <tr
                     key={r.reservation_code}
-                    onClick={() => select(index)}
+                    onClick={() => setSelectedIndex(index)}
                     className={`cursor-pointer transition ${
                       index === selectedIndex ? "bg-brand/5" : "hover:bg-slate-50"
                     }`}
@@ -254,53 +245,6 @@ function AiDemoPage() {
               ))}
             </div>
 
-            <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-500">
-              <strong className="text-slate-700">Human-in-the-loop:</strong> This suggestion was
-              generated from historical data patterns. Staff review and approval is required before
-              sending.
-            </p>
-
-            {decision === null ? (
-              <div className="mt-4 space-y-2">
-                <button
-                  onClick={() => setDecision("approved")}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
-                >
-                  <FaCheck className="h-3.5 w-3.5" />
-                  Approve & Send
-                </button>
-                <div className="grid grid-cols-2 gap-2">
-                  <button className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200">
-                    <FaPen className="h-3 w-3" />
-                    Edit Strategy
-                  </button>
-                  <button
-                    onClick={() => setDecision("rejected")}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                  >
-                    <FaXmark className="h-3 w-3" />
-                    Reject
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`mt-4 rounded-xl p-3 text-center text-sm font-medium ${
-                  decision === "approved"
-                    ? "bg-green-50 text-green-700"
-                    : "bg-slate-100 text-slate-500"
-                }`}
-              >
-                {decision === "approved" ? "✓ Approved & sent (demo)" : "Rejected (demo)"}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-2xl bg-brand p-5 text-white">
-            <div className="text-sm font-medium text-blue-100">AI Performance Summary</div>
-            <p className="mt-1 text-sm leading-relaxed">
-              AI strategies prevented <strong>$4,250</strong> in revenue loss over the last 7 days.
-            </p>
           </div>
         </div>
       </div>

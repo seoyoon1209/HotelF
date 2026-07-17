@@ -7,8 +7,8 @@ function NotFound() {
     <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-slate-300 py-16 text-center">
       <FaCompass className="h-10 w-10 text-slate-400" />
       <p className="text-lg font-medium text-slate-900">Page not found.</p>
-      <Link to="/dashboard" className="text-sm text-blue-700 hover:underline">
-        Back to dashboard
+      <Link to="/demo" className="text-sm text-blue-700 hover:underline">
+        Back to AI demo
       </Link>
     </div>
   );
