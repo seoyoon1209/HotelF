@@ -125,7 +125,7 @@ function PredictionDashboard() {
               />
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-200/60">
+            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
               <h2 className="font-semibold text-slate-900">위험도 구성</h2>
               <div className="mt-4">
                 <RiskDistributionBar counts={counts} />
@@ -144,7 +144,7 @@ function PredictionDashboard() {
               </Link>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
+            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
               <div className="relative flex-1 min-w-[200px]">
                 <FaMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                 <input
@@ -180,7 +180,7 @@ function PredictionDashboard() {
               </select>
             </div>
 
-            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md shadow-slate-200/60">
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
@@ -241,10 +241,9 @@ function RiskStatCard({ label, count, total = 0, icon: Icon, color }) {
   const percent = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl border border-white p-5 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group relative overflow-hidden rounded-2xl border border-slate-200 p-5"
       style={{
         background: `linear-gradient(160deg, ${color}17 0%, #ffffff 55%)`,
-        boxShadow: `0 8px 20px -10px ${color}55, 0 2px 6px rgba(15, 23, 42, 0.06)`,
       }}
     >
       <div
@@ -260,10 +259,9 @@ function RiskStatCard({ label, count, total = 0, icon: Icon, color }) {
           </div>
         </div>
         <span
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white"
           style={{
             background: `linear-gradient(135deg, ${color}, ${color}b3)`,
-            boxShadow: `0 6px 14px -4px ${color}80`,
           }}
         >
           <Icon className="h-4 w-4" />
