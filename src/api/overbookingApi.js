@@ -1,4 +1,4 @@
-// overbooking API 호출 모음. 백엔드 router/OverbookingRouter.py와 1:1 대응.
+// overbooking API 호출 모음
 import instance from "./axios";
 
 export const getOverbookingSummary = (dateFrom, dateTo) =>
