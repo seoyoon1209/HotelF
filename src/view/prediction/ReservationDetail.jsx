@@ -1,5 +1,5 @@
 // 3. 예약 상세 + 시뮬레이터: 개입(할인쿠폰/조식쿠폰) 조작 → Before/After 예측 비교.
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft, FaPlay, FaLightbulb, FaTicket } from "react-icons/fa6";
 import PredictionBadge from "src/components/prediction/PredictionBadge";
@@ -7,6 +7,7 @@ import { useToast } from "src/components/prediction/ToastProvider";
 import { simulateProbability, estimateCost } from "src/data/predictionDemoData";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
 import { createReservationAction } from "src/api/reservationActionApi";
+import { createPrediction } from "src/api/predictionApi";
 import LoadingState from "src/components/common/LoadingState";
 
 const COMBOS = [
@@ -20,8 +21,9 @@ function ReservationDetail() {
   const { reservationId } = useParams();
   const navigate = useNavigate();
   const showToast = useToast();
-  const { loading, getReservationByCode, markActionDone } = usePredictionFilters();
+  const { loading, getReservationByCode, markActionDone, applyPrediction } = usePredictionFilters();
   const reservation = getReservationByCode(reservationId);
+  const requestedPredictionRef = useRef(null);
 
   const [discountPercent, setDiscountPercent] = useState(10);
   const [breakfastCoupon, setBreakfastCoupon] = useState(false);
@@ -46,6 +48,19 @@ function ReservationDetail() {
       return { ...combo, resolvedDiscount: params.discountPercent, label };
     });
   }, [reservation, discountPercent]);
+
+  // 예측이 아직 없는 예약(risk_label == null)이면 상세 진입 시 실제 모델을 호출해 채워넣는다.
+  useEffect(() => {
+    if (!reservation || reservation.risk_label != null) return;
+    if (requestedPredictionRef.current === reservation.reservation_id) return;
+    requestedPredictionRef.current = reservation.reservation_id;
+
+    createPrediction(reservation.reservation_id)
+      .then((res) => applyPrediction(reservation.reservation_id, Number(res.data.cancellation_probability)))
+      .catch(() => {
+        // 모델이 아직 준비되지 않은 환경(로컬 등)일 수 있음 - 배지가 "예측 없음"으로 남는다.
+      });
+  }, [reservation, applyPrediction]);
 
   if (loading) {
     return <LoadingState />;

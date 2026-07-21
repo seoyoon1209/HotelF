@@ -50,6 +50,16 @@ export function PredictionFilterProvider({ children }) {
     );
   };
 
+  const applyPrediction = (reservationId, probability) => {
+    setReservations((prev) =>
+      prev.map((r) =>
+        r.reservation_id === reservationId
+          ? { ...r, base_probability: probability, risk_label: probability >= 0.5 ? "CANCEL" : "KEEP" }
+          : r
+      )
+    );
+  };
+
   const getReservationByCode = (code) => reservations.find((r) => r.reservation_code === code);
 
   const hotelBranchOptions = useMemo(
@@ -75,6 +85,7 @@ export function PredictionFilterProvider({ children }) {
     error,
     reservations,
     markActionDone,
+    applyPrediction,
     getReservationByCode,
     period,
     setPeriod,
