@@ -20,7 +20,7 @@ const PAGE_SIZE = 10;
 function ReservationList() {
   const navigate = useNavigate();
   const showToast = useToast();
-  const { filteredReservations } = usePredictionFilters();
+  const { filteredReservations, loading, error } = usePredictionFilters();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [query, setQuery] = useState("");
@@ -220,7 +220,11 @@ function ReservationList() {
               {pageRows.length === 0 && (
                 <tr>
                   <td colSpan={10} className="px-4 py-10 text-center text-slate-400">
-                    조건에 맞는 예약이 없습니다.
+                    {loading
+                      ? "불러오는 중..."
+                      : error
+                        ? "예약 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요."
+                        : "조건에 맞는 예약이 없습니다."}
                   </td>
                 </tr>
               )}

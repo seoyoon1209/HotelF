@@ -4,7 +4,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft, FaPlay, FaLightbulb, FaTicket } from "react-icons/fa6";
 import PredictionBadge from "src/components/prediction/PredictionBadge";
 import { useToast } from "src/components/prediction/ToastProvider";
-import { getReservationByCode, simulateProbability, estimateCost } from "src/data/predictionDemoData";
+import { simulateProbability, estimateCost } from "src/data/predictionDemoData";
+import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
+import { createReservationAction } from "src/api/reservationActionApi";
 
 const COMBOS = [
   { key: "none", title: "아무것도 안함", discountPercent: 0, breakfastCoupon: false },
@@ -17,6 +19,7 @@ function ReservationDetail() {
   const { reservationId } = useParams();
   const navigate = useNavigate();
   const showToast = useToast();
+  const { loading, getReservationByCode, markActionDone } = usePredictionFilters();
   const reservation = getReservationByCode(reservationId);
 
   const [discountPercent, setDiscountPercent] = useState(10);
@@ -24,6 +27,7 @@ function ReservationDetail() {
   const [result, setResult] = useState(null);
   const [applied, setApplied] = useState(reservation?.action_status === "DONE");
   const [running, setRunning] = useState(false);
+  const [applying, setApplying] = useState(false);
 
   const cost = useMemo(() => {
     if (!reservation) return null;
@@ -41,6 +45,10 @@ function ReservationDetail() {
       return { ...combo, resolvedDiscount: params.discountPercent, label };
     });
   }, [reservation, discountPercent]);
+
+  if (loading) {
+    return <div className="py-10 text-center text-slate-400">불러오는 중...</div>;
+  }
 
   if (!reservation) {
     return (
@@ -65,9 +73,25 @@ function ReservationDetail() {
   };
 
   const applyAction = () => {
-    reservation.action_status = "DONE";
-    setApplied(true);
-    showToast({ title: "쿠폰 발급 완료", message: "고객에게 쿠폰이 발급되었습니다.", tone: "success" });
+    if (!result) return;
+    setApplying(true);
+    createReservationAction(reservation.reservation_id, {
+      discount_percent: discountPercent,
+      breakfast_coupon: breakfastCoupon,
+      probability_before: reservation.base_probability,
+      probability_after: result.probability,
+      label_before: reservation.risk_label,
+      label_after: result.label,
+    })
+      .then(() => {
+        markActionDone(reservation.reservation_id);
+        setApplied(true);
+        showToast({ title: "쿠폰 발급 완료", message: "고객에게 쿠폰이 발급되었습니다.", tone: "success" });
+      })
+      .catch(() => {
+        showToast({ title: "쿠폰 발급 실패", message: "잠시 후 다시 시도해주세요.", tone: "neutral" });
+      })
+      .finally(() => setApplying(false));
   };
 
   const labelChanged = result && result.label !== reservation.risk_label;
@@ -222,11 +246,11 @@ function ReservationDetail() {
               <button
                 type="button"
                 onClick={applyAction}
-                disabled={applied}
+                disabled={applied || applying}
                 className="mt-3 flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
               >
                 <FaTicket className="h-3.5 w-3.5" />
-                {applied ? "적용 완료" : "실제 적용 (쿠폰 발급)"}
+                {applied ? "적용 완료" : applying ? "발급 중..." : "실제 적용 (쿠폰 발급)"}
               </button>
             </div>
           )}

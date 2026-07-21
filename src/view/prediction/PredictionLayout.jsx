@@ -1,5 +1,7 @@
-// "취소 예측 대응 시스템" 데모 4개 화면(대시보드/예약 리스트/상세+시뮬레이터/리포트)의 공통 레이아웃.
-// 실제 백엔드 없이 정적 목업 데이터로 동작하는 기획 데모 화면이다.
+// "취소 예측 대응 시스템" 4개 화면(대시보드/예약 리스트/상세+시뮬레이터/리포트)의 공통 레이아웃.
+// 예약/예측/조치 이력/모델 정보 모두 실제 백엔드·DB에서 가져온다.
+// 시뮬레이터의 "조작 후" 확률만 예외로, 실제 ML 재추론이 아니라 프론트에서 계산하는 단순 산술
+// 근사치다 (백엔드에 what-if 재추론 엔드포인트가 아직 없음).
 import { NavLink, Outlet, useParams } from "react-router-dom";
 import { FaShieldHalved, FaTriangleExclamation } from "react-icons/fa6";
 import { ToastProvider } from "src/components/prediction/ToastProvider";
@@ -31,7 +33,8 @@ function PredictionLayout() {
 
           <div className="mt-3 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
             <FaTriangleExclamation className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            기획 데모 화면입니다. 모든 예약/예측 데이터는 가상의 예시이며 실제 API와 연동되어 있지 않습니다.
+            예약·예측·조치 이력·모델 정보 모두 실제 DB와 연동되어 있습니다. 시뮬레이터의 "조작 후"
+            수치만 단순 산술로 근사한 참고값입니다.
           </div>
 
           <div className="mt-5">

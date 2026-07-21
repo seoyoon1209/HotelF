@@ -26,7 +26,7 @@ function computeSegmentRanking(reservations) {
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { filteredReservations } = usePredictionFilters();
+  const { filteredReservations, loading, error } = usePredictionFilters();
 
   const stats = useMemo(() => {
     const total = filteredReservations.length;
@@ -42,44 +42,55 @@ function Dashboard() {
     <div>
       <FilterBar />
 
-      <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <KpiCard label="총 예약 수" value={`${stats.total.toLocaleString()}건`} />
-        <KpiCard label="취소예상" value={`${stats.cancel.toLocaleString()}건`} accent="text-red-600" />
-        <KpiCard label="미취소예상" value={`${stats.keep.toLocaleString()}건`} accent="text-green-600" />
-        <KpiCard label="예상취소 비율" value={`${(stats.ratio * 100).toFixed(1)}%`} accent="text-red-600" />
-      </div>
+      {error && (
+        <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          예약 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요.
+        </div>
+      )}
+      {loading && <div className="mt-3 py-10 text-center text-slate-400">불러오는 중...</div>}
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="font-semibold text-slate-900">취소예상 vs 미취소예상 비율</h2>
-          <div className="mt-4 flex items-center gap-8">
-            <DonutChart cancelCount={stats.cancel} keepCount={stats.keep} />
-            <div className="space-y-3 text-sm">
-              <LegendRow color="#ef4444" label="취소 예상" count={stats.cancel} />
-              <LegendRow color="#dcfce7" borderColor="#16a34a" label="미취소 예상" count={stats.keep} />
+      {!loading && !error && (
+        <>
+          <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <KpiCard label="총 예약 수" value={`${stats.total.toLocaleString()}건`} />
+            <KpiCard label="취소예상" value={`${stats.cancel.toLocaleString()}건`} accent="text-red-600" />
+            <KpiCard label="미취소예상" value={`${stats.keep.toLocaleString()}건`} accent="text-green-600" />
+            <KpiCard label="예상취소 비율" value={`${(stats.ratio * 100).toFixed(1)}%`} accent="text-red-600" />
+          </div>
+
+          <div className="mt-6 grid gap-5 lg:grid-cols-2">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="font-semibold text-slate-900">취소예상 vs 미취소예상 비율</h2>
+              <div className="mt-4 flex items-center gap-8">
+                <DonutChart cancelCount={stats.cancel} keepCount={stats.keep} />
+                <div className="space-y-3 text-sm">
+                  <LegendRow color="#ef4444" label="취소 예상" count={stats.cancel} />
+                  <LegendRow color="#dcfce7" borderColor="#16a34a" label="미취소 예상" count={stats.keep} />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6">
+              <h2 className="font-semibold text-slate-900">세그먼트별 취소예상 비율 순위</h2>
+              <p className="mt-0.5 text-xs text-slate-400">deposit_type · market_segment 기준 (표본 3건 이상)</p>
+              <div className="mt-4">
+                <SegmentRankList rows={segmentRanking} />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6">
-          <h2 className="font-semibold text-slate-900">세그먼트별 취소예상 비율 순위</h2>
-          <p className="mt-0.5 text-xs text-slate-400">deposit_type · market_segment 기준 (표본 3건 이상)</p>
-          <div className="mt-4">
-            <SegmentRankList rows={segmentRanking} />
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={() => navigate("/prediction/reservations?status=CANCEL")}
+              className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              조치가 필요한 예약 보기
+              <FaArrowRight className="h-3.5 w-3.5" />
+            </button>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-6 flex justify-center">
-        <button
-          type="button"
-          onClick={() => navigate("/prediction/reservations?status=CANCEL")}
-          className="flex items-center gap-2 rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700"
-        >
-          조치가 필요한 예약 보기
-          <FaArrowRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
+        </>
+      )}
     </div>
   );
 }

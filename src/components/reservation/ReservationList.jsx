@@ -4,19 +4,28 @@ import { Link } from "react-router-dom";
 import { getReservations } from "src/api/reservationApi";
 import RiskBadge from "src/components/common/RiskBadge";
 
+const PAGE_SIZE = 10;
+
 function ReservationList() {
   const [reservations, setReservations] = useState([]);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     getReservations().then((res) => setReservations(res.data));
   }, []);
 
+  const totalPages = Math.max(1, Math.ceil(reservations.length / PAGE_SIZE));
+  const pageRows = reservations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900">예약 목록</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-slate-900">예약 목록</h1>
+        <span className="text-sm text-slate-400">총 {reservations.length}건</span>
+      </div>
 
       <div className="mt-5 space-y-2 sm:hidden">
-        {reservations.map((reservation) => (
+        {pageRows.map((reservation) => (
           <Link
             key={reservation.reservation_id}
             to={`/reservations/${reservation.reservation_id}`}
@@ -48,7 +57,7 @@ function ReservationList() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {reservations.map((reservation) => (
+            {pageRows.map((reservation) => (
               <tr key={reservation.reservation_id} className="transition hover:bg-slate-50">
                 <td className="px-4 py-3">
                   <Link
@@ -76,6 +85,33 @@ function ReservationList() {
           </tbody>
         </table>
       </div>
+
+      {reservations.length > 0 && (
+        <div className="mt-3 flex items-center justify-between px-1 text-sm text-slate-500">
+          <span>
+            {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + pageRows.length}건 / 총 {reservations.length}건
+          </span>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="rounded-lg px-2.5 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-30"
+            >
+              이전
+            </button>
+            <span className="px-2 text-slate-700">{page} / {totalPages}</span>
+            <button
+              type="button"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="rounded-lg px-2.5 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-30"
+            >
+              다음
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

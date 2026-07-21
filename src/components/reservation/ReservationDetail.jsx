@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getReservationById } from "src/api/reservationApi";
-import { getPredictionsByReservation } from "src/api/predictionApi";
+import { getPredictionsByReservation, getModelInfo } from "src/api/predictionApi";
 import RiskBadge from "src/components/common/RiskBadge";
 
 const SUGGESTED_ACTIONS = [
@@ -16,10 +16,14 @@ function ReservationDetail() {
   const [reservation, setReservation] = useState(null);
   const [predictions, setPredictions] = useState([]);
   const [doneActions, setDoneActions] = useState({});
+  const [modelInfo, setModelInfo] = useState(null);
 
   useEffect(() => {
     getReservationById(reservationId).then((res) => setReservation(res.data));
     getPredictionsByReservation(reservationId).then((res) => setPredictions(res.data));
+    getModelInfo()
+      .then((res) => setModelInfo(res.data))
+      .catch(() => setModelInfo(null));
   }, [reservationId]);
 
   if (!reservation) {
@@ -37,7 +41,8 @@ function ReservationDetail() {
         <RiskBadge riskLevel={reservation.risk_level} />
       </div>
       <p className="mt-1 text-xs text-slate-500">
-        취소 위험도는 참고용 예측치입니다 (모델 정확도 약 78% 수준).
+        취소 위험도는 참고용 예측치입니다
+        {modelInfo?.accuracy != null && ` (모델 정확도 약 ${Math.round(modelInfo.accuracy * 100)}% 수준)`}.
       </p>
 
       <div className="mt-5 grid grid-cols-2 gap-4 rounded-xl border border-slate-200 bg-white p-5 text-sm sm:grid-cols-4">
