@@ -95,18 +95,37 @@ function PredictionDashboard() {
         !error && (
           <>
             <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
-              <RiskStatCard label="낮음" count={counts.LOW} icon={FaCircleCheck} color="#0ca30c" />
-              <RiskStatCard label="보통" count={counts.MEDIUM} icon={FaCircleExclamation} color="#fab219" />
+              <RiskStatCard
+                label="낮음"
+                count={counts.LOW}
+                total={reservations.length}
+                icon={FaCircleCheck}
+                color="#0ca30c"
+              />
+              <RiskStatCard
+                label="보통"
+                count={counts.MEDIUM}
+                total={reservations.length}
+                icon={FaCircleExclamation}
+                color="#fab219"
+              />
               <RiskStatCard
                 label="높음"
                 count={counts.HIGH + counts.CRITICAL}
+                total={reservations.length}
                 icon={FaTriangleExclamation}
                 color="#d03b3b"
               />
-              <RiskStatCard label="예측 없음" count={counts.none} icon={FaCircleQuestion} color="#94a3b8" />
+              <RiskStatCard
+                label="예측 없음"
+                count={counts.none}
+                total={reservations.length}
+                icon={FaCircleQuestion}
+                color="#94a3b8"
+              />
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="mt-6 rounded-2xl border border-slate-100 bg-white p-6 shadow-md shadow-slate-200/60">
               <h2 className="font-semibold text-slate-900">위험도 구성</h2>
               <div className="mt-4">
                 <RiskDistributionBar counts={counts} />
@@ -125,7 +144,7 @@ function PredictionDashboard() {
               </Link>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
+            <div className="mt-3 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-100 bg-white p-3 shadow-sm">
               <div className="relative flex-1 min-w-[200px]">
                 <FaMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
                 <input
@@ -161,7 +180,7 @@ function PredictionDashboard() {
               </select>
             </div>
 
-            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="mt-3 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-md shadow-slate-200/60">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
@@ -218,22 +237,53 @@ function PredictionDashboard() {
   );
 }
 
-function RiskStatCard({ label, count, icon: Icon, color }) {
+function RiskStatCard({ label, count, total = 0, icon: Icon, color }) {
+  const percent = total > 0 ? Math.round((count / total) * 100) : 0;
   return (
     <div
-      className="rounded-2xl border border-slate-200 bg-white p-5"
-      style={{ borderLeftWidth: 4, borderLeftColor: color }}
+      className="group relative overflow-hidden rounded-2xl border border-white p-5 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      style={{
+        background: `linear-gradient(160deg, ${color}17 0%, #ffffff 55%)`,
+        boxShadow: `0 8px 20px -10px ${color}55, 0 2px 6px rgba(15, 23, 42, 0.06)`,
+      }}
     >
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium text-slate-500">{label}</div>
+      <div
+        className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-40 blur-2xl transition-opacity duration-300 group-hover:opacity-60"
+        style={{ backgroundColor: color }}
+      />
+      <div className="relative flex items-start justify-between">
+        <div>
+          <div className="text-sm font-semibold text-slate-600">{label}</div>
+          <div className="mt-1.5 flex items-baseline gap-1.5">
+            <span className="text-4xl font-extrabold tracking-tight text-slate-900">{count}</span>
+            <span className="text-sm font-medium text-slate-400">건</span>
+          </div>
+        </div>
         <span
-          className="flex h-8 w-8 items-center justify-center rounded-full"
-          style={{ backgroundColor: `${color}1a`, color }}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3"
+          style={{
+            background: `linear-gradient(135deg, ${color}, ${color}b3)`,
+            boxShadow: `0 6px 14px -4px ${color}80`,
+          }}
         >
           <Icon className="h-4 w-4" />
         </span>
       </div>
-      <div className="mt-2 text-3xl font-bold text-slate-900">{count}</div>
+
+      <div className="relative mt-4">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-400">전체 {total}건 중</span>
+          <span className="font-bold" style={{ color }}>
+            {percent}%
+          </span>
+        </div>
+        <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <div
+            className="h-full rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${percent}%`, background: `linear-gradient(90deg, ${color}, ${color}cc)` }}
+          />
+        </div>
+      </div>
     </div>
   );
 }
