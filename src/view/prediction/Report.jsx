@@ -4,6 +4,7 @@ import { FaDownload, FaCircleInfo } from "react-icons/fa6";
 import { useToast } from "src/components/prediction/ToastProvider";
 import { getActionReport } from "src/api/reservationActionApi";
 import { getModelInfo } from "src/api/predictionApi";
+import LoadingState from "src/components/common/LoadingState";
 
 const REPORT_WEEKS = 8;
 
@@ -83,7 +84,7 @@ function Report() {
       )}
 
       {loading ? (
-        <div className="mt-3 py-10 text-center text-slate-400">불러오는 중...</div>
+        <LoadingState className="mt-3" />
       ) : (
         !error && (
           <>

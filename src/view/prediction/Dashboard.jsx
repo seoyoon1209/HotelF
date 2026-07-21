@@ -6,6 +6,7 @@ import FilterBar from "src/components/prediction/FilterBar";
 import DonutChart from "src/components/prediction/DonutChart";
 import SegmentRankList from "src/components/prediction/SegmentRankList";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
+import LoadingState from "src/components/common/LoadingState";
 
 function computeSegmentRanking(reservations) {
   const groups = {};
@@ -47,7 +48,7 @@ function Dashboard() {
           예약 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요.
         </div>
       )}
-      {loading && <div className="mt-3 py-10 text-center text-slate-400">불러오는 중...</div>}
+      {loading && <LoadingState className="mt-3" />}
 
       {!loading && !error && (
         <>

@@ -12,6 +12,7 @@ import { getReservations } from "src/api/reservationApi";
 import { getModelInfo } from "src/api/predictionApi";
 import RiskBadge from "src/components/common/RiskBadge";
 import RiskDistributionBar from "src/components/common/RiskDistributionBar";
+import LoadingState from "src/components/common/LoadingState";
 
 const RISK_CHIPS = [
   { value: "all", label: "전체" },
@@ -89,7 +90,7 @@ function PredictionDashboard() {
       )}
 
       {loading ? (
-        <div className="mt-6 py-10 text-center text-slate-400">불러오는 중...</div>
+        <LoadingState className="mt-6" />
       ) : (
         !error && (
           <>

@@ -7,6 +7,7 @@ import PredictionBadge from "src/components/prediction/PredictionBadge";
 import { useToast } from "src/components/prediction/ToastProvider";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
 import { simulateProbability } from "src/data/predictionDemoData";
+import LoadingState from "src/components/common/LoadingState";
 
 const STATUS_CHIPS = [
   { value: "all", label: "전체" },
@@ -220,11 +221,13 @@ function ReservationList() {
               {pageRows.length === 0 && (
                 <tr>
                   <td colSpan={10} className="px-4 py-10 text-center text-slate-400">
-                    {loading
-                      ? "불러오는 중..."
-                      : error
-                        ? "예약 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요."
-                        : "조건에 맞는 예약이 없습니다."}
+                    {loading ? (
+                      <LoadingState inline />
+                    ) : error ? (
+                      "예약 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요."
+                    ) : (
+                      "조건에 맞는 예약이 없습니다."
+                    )}
                   </td>
                 </tr>
               )}

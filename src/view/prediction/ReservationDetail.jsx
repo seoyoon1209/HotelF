@@ -7,6 +7,7 @@ import { useToast } from "src/components/prediction/ToastProvider";
 import { simulateProbability, estimateCost } from "src/data/predictionDemoData";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
 import { createReservationAction } from "src/api/reservationActionApi";
+import LoadingState from "src/components/common/LoadingState";
 
 const COMBOS = [
   { key: "none", title: "아무것도 안함", discountPercent: 0, breakfastCoupon: false },
@@ -47,7 +48,7 @@ function ReservationDetail() {
   }, [reservation, discountPercent]);
 
   if (loading) {
-    return <div className="py-10 text-center text-slate-400">불러오는 중...</div>;
+    return <LoadingState />;
   }
 
   if (!reservation) {

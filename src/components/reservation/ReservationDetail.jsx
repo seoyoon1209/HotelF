@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { getReservationById } from "src/api/reservationApi";
 import { getPredictionsByReservation, getModelInfo } from "src/api/predictionApi";
 import RiskBadge from "src/components/common/RiskBadge";
+import LoadingState from "src/components/common/LoadingState";
 
 const SUGGESTED_ACTIONS = [
   { key: "recheck", label: "재확인 연락" },
@@ -27,7 +28,7 @@ function ReservationDetail() {
   }, [reservationId]);
 
   if (!reservation) {
-    return <div className="text-slate-500">불러오는 중...</div>;
+    return <LoadingState />;
   }
 
   const isHighRisk = ["HIGH", "CRITICAL"].includes(reservation.risk_level);
