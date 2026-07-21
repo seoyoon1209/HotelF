@@ -9,13 +9,9 @@ import {
   FaWandMagicSparkles,
   FaMagnifyingGlassChart,
   FaLightbulb,
-  FaCheck,
-  FaXmark,
-  FaPen,
   FaArrowTrendUp,
 } from "react-icons/fa6";
 import RiskBadge from "src/components/common/RiskBadge";
-import RiskDistributionBar from "src/components/common/RiskDistributionBar";
 
 const SAMPLE_RESERVATIONS = [
   {
@@ -95,24 +91,19 @@ const SAMPLE_RESERVATIONS = [
 
 const MODEL_ACCURACY = 0.78; // 기획서 기준 모델 정확도
 
+const PROBABILITY_COLOR = {
+  LOW: "text-green-600",
+  MEDIUM: "text-yellow-600",
+  HIGH: "text-orange-600",
+  CRITICAL: "text-red-600",
+};
+
 function AiDemoPage() {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [decision, setDecision] = useState(null); // "approved" | "rejected" | null
   const selected = SAMPLE_RESERVATIONS[selectedIndex];
-
-  const counts = { LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0, none: 0 };
-  SAMPLE_RESERVATIONS.forEach((r) => {
-    counts[r.risk_level] += 1;
-  });
-  const otaShare = Math.round(
-    (SAMPLE_RESERVATIONS.filter((r) => r.market_segment === "OTA").length /
-      SAMPLE_RESERVATIONS.length) *
-      100
-  );
 
   const select = (index) => {
     setSelectedIndex(index);
-    setDecision(null);
   };
 
   return (
@@ -145,19 +136,6 @@ function AiDemoPage() {
           color="#0ca30c"
           trendUp
         />
-      </div>
-
-      {/* 위험도 분포 + 보조 지표 */}
-      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-        <h2 className="font-semibold text-slate-900">취소 위험도 분포</h2>
-        <div className="mt-4">
-          <RiskDistributionBar counts={counts} />
-        </div>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <MetricBar label="OTA 예약 비중" value={`${otaShare}%`} percent={otaShare} />
-          <MetricBar label="평균 리드타임" value="14일" percent={45} />
-          <MetricBar label="취소 정책 유연성" value="높음" percent={80} />
-        </div>
       </div>
 
       <div className="mt-6 grid gap-5 xl:grid-cols-[1fr_22rem]">
@@ -217,10 +195,17 @@ function AiDemoPage() {
               <span className="font-semibold text-slate-900">{selected.reservation_code}</span>
               <RiskBadge riskLevel={selected.risk_level} />
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">
-                {Math.round(selected.cancellation_probability * 100)}% 취소 확률
+            <div className="mt-4 flex items-end gap-2">
+              <span
+                className={`text-5xl font-bold leading-none ${
+                  PROBABILITY_COLOR[selected.risk_level] ?? "text-slate-900"
+                }`}
+              >
+                {Math.round(selected.cancellation_probability * 100)}%
               </span>
+              <span className="pb-1.5 text-sm font-medium text-slate-400">취소 확률</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
                 {selected.policy_tag}
               </span>
@@ -259,47 +244,6 @@ function AiDemoPage() {
               패턴을 기반으로 생성되었습니다. 최종 발송 전 담당 직원의 검토 및 승인이 필요합니다.
             </p>
 
-            {decision === null ? (
-              <div className="mt-4 space-y-2">
-                <button
-                  onClick={() => setDecision("approved")}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark"
-                >
-                  <FaCheck className="h-3.5 w-3.5" />
-                  승인 및 발송
-                </button>
-                <div className="grid grid-cols-2 gap-2">
-                  <button className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200">
-                    <FaPen className="h-3 w-3" />
-                    전략 수정
-                  </button>
-                  <button
-                    onClick={() => setDecision("rejected")}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-                  >
-                    <FaXmark className="h-3 w-3" />
-                    반려
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div
-                className={`mt-4 rounded-xl p-3 text-center text-sm font-medium ${
-                  decision === "approved"
-                    ? "bg-green-50 text-green-700"
-                    : "bg-slate-100 text-slate-500"
-                }`}
-              >
-                {decision === "approved" ? "✓ 승인 및 발송 완료 (데모)" : "반려 처리됨 (데모)"}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-2xl bg-brand p-5 text-white">
-            <div className="text-sm font-medium text-blue-100">AI 성과 요약</div>
-            <p className="mt-1 text-sm leading-relaxed">
-              지난 7일간 AI 전략을 통해 <strong>$4,250</strong>의 매출 손실을 방지했습니다.
-            </p>
           </div>
         </div>
       </div>
@@ -319,20 +263,6 @@ function AccentStatCard({ label, value, sub, color, trendUp = false }) {
         {trendUp && <FaArrowTrendUp className="h-3.5 w-3.5 text-green-600" />}
       </div>
       {sub && <div className="mt-0.5 text-xs text-slate-400">{sub}</div>}
-    </div>
-  );
-}
-
-function MetricBar({ label, value, percent }) {
-  return (
-    <div>
-      <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-500">{label}</span>
-        <span className="font-medium text-slate-900">{value}</span>
-      </div>
-      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-        <div className="h-full rounded-full bg-brand" style={{ width: `${percent}%` }} />
-      </div>
     </div>
   );
 }
