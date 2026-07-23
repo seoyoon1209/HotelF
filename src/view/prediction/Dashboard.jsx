@@ -6,23 +6,8 @@ import FilterBar from "src/components/prediction/FilterBar";
 import DonutChart from "src/components/prediction/DonutChart";
 import SegmentRankList from "src/components/prediction/SegmentRankList";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
+import { DEPOSIT_LABEL, SEGMENT_LABEL } from "src/data/labels";
 import LoadingState from "src/components/common/LoadingState";
-
-// 원본 코드값 → 화면에 보여줄 한글 라벨.
-const DEPOSIT_LABEL = {
-  "No Deposit": "보증금 없음",
-  "Non Refund": "환불 불가",
-  Refundable: "환불 가능",
-};
-const SEGMENT_LABEL = {
-  OTA: "온라인 여행사(OTA)",
-  "Online TA": "온라인 여행사(OTA)",
-  "Offline TA/TO": "오프라인 여행사",
-  Groups: "단체",
-  Direct: "직접 예약",
-  Corporate: "기업",
-  Other: "기타",
-};
 
 function computeSegmentRanking(reservations) {
   const groups = {};
