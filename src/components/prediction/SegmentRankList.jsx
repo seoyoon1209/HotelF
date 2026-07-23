@@ -9,9 +9,16 @@ function SegmentRankList({ rows }) {
   return (
     <ul className="space-y-3">
       {rows.map((row) => (
-        <li key={row.label}>
+        <li key={`${row.group}-${row.label}`}>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600">{row.label}</span>
+            <span className="flex items-center gap-2">
+              {row.group && (
+                <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-medium text-slate-500">
+                  {row.group}
+                </span>
+              )}
+              <span className="text-slate-700">{row.label}</span>
+            </span>
             <span className="font-semibold text-slate-900">{Math.round(row.ratio * 100)}%</span>
           </div>
           <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100">

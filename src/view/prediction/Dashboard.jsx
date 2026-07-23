@@ -8,18 +8,42 @@ import SegmentRankList from "src/components/prediction/SegmentRankList";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
 import LoadingState from "src/components/common/LoadingState";
 
+// 원본 코드값 → 화면에 보여줄 한글 라벨.
+const DEPOSIT_LABEL = {
+  "No Deposit": "보증금 없음",
+  "Non Refund": "환불 불가",
+  Refundable: "환불 가능",
+};
+const SEGMENT_LABEL = {
+  OTA: "온라인 여행사(OTA)",
+  "Online TA": "온라인 여행사(OTA)",
+  "Offline TA/TO": "오프라인 여행사",
+  Groups: "단체",
+  Direct: "직접 예약",
+  Corporate: "기업",
+  Other: "기타",
+};
+
 function computeSegmentRanking(reservations) {
   const groups = {};
   reservations.forEach((r) => {
-    const keys = [`deposit_type = ${r.deposit_type}`, `market_segment = ${r.market_segment}`];
-    keys.forEach((key) => {
-      if (!groups[key]) groups[key] = { cancel: 0, total: 0 };
+    const keys = [
+      { key: `deposit:${r.deposit_type}`, group: "보증금", label: DEPOSIT_LABEL[r.deposit_type] ?? r.deposit_type },
+      { key: `segment:${r.market_segment}`, group: "세그먼트", label: SEGMENT_LABEL[r.market_segment] ?? r.market_segment },
+    ];
+    keys.forEach(({ key, group, label }) => {
+      if (!groups[key]) groups[key] = { cancel: 0, total: 0, group, label };
       groups[key].total += 1;
       if (r.risk_label === "CANCEL") groups[key].cancel += 1;
     });
   });
-  return Object.entries(groups)
-    .map(([label, { cancel, total }]) => ({ label, ratio: total ? cancel / total : 0, total }))
+  return Object.values(groups)
+    .map(({ cancel, total, group, label }) => ({
+      group,
+      label,
+      ratio: total ? cancel / total : 0,
+      total,
+    }))
     .filter((row) => row.total >= 3)
     .sort((a, b) => b.ratio - a.ratio)
     .slice(0, 5);
@@ -73,7 +97,7 @@ function Dashboard() {
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
               <h2 className="font-semibold text-slate-900">세그먼트별 취소예상 비율 순위</h2>
-              <p className="mt-0.5 text-xs text-slate-400">deposit_type · market_segment 기준 (표본 3건 이상)</p>
+              <p className="mt-0.5 text-xs text-slate-400">보증금 유형 · 시장 세그먼트 기준 (표본 3건 이상)</p>
               <div className="mt-4">
                 <SegmentRankList rows={segmentRanking} />
               </div>

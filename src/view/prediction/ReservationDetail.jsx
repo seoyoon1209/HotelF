@@ -18,6 +18,7 @@ import { usePredictionFilters } from "src/view/prediction/PredictionFilterContex
 import { createReservationAction } from "src/api/reservationActionApi";
 import { createPrediction } from "src/api/predictionApi";
 import { getAiInsight } from "src/api/aiInsightApi";
+import { DEPOSIT_LABEL, SEGMENT_LABEL, MEAL_LABEL } from "src/data/labels";
 import LoadingState from "src/components/common/LoadingState";
 
 const COMBOS = [
@@ -180,13 +181,13 @@ function ReservationDetail() {
             </div>
 
             <div className="mt-5 border-t border-slate-100 pt-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-slate-400">현재 입력 피처</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-400">예약 주요 특성</div>
               <div className="mt-2 flex flex-wrap gap-2">
-                <FeatureChip label={`lead_time = ${reservation.lead_time}`} />
-                <FeatureChip label={`adr = ${reservation.adr.toLocaleString()}원`} />
-                <FeatureChip label={`meal = ${reservation.meal}`} />
-                <FeatureChip label={`deposit_type = ${reservation.deposit_type}`} />
-                <FeatureChip label={`market_segment = ${reservation.market_segment}`} />
+                <FeatureChip label="리드타임" value={`${reservation.lead_time}일`} />
+                <FeatureChip label="1박 요금(ADR)" value={`${reservation.adr.toLocaleString()}원`} />
+                <FeatureChip label="식사" value={MEAL_LABEL[reservation.meal] ?? reservation.meal} />
+                <FeatureChip label="보증금" value={DEPOSIT_LABEL[reservation.deposit_type] ?? reservation.deposit_type} />
+                <FeatureChip label="세그먼트" value={SEGMENT_LABEL[reservation.market_segment] ?? reservation.market_segment} />
               </div>
             </div>
           </div>
@@ -388,9 +389,12 @@ function InfoField({ label, value }) {
   );
 }
 
-function FeatureChip({ label }) {
+function FeatureChip({ label, value }) {
   return (
-    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{label}</span>
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+      <span className="text-slate-400">{label}</span>
+      <span className="text-slate-800">{value}</span>
+    </span>
   );
 }
 
