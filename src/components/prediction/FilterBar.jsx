@@ -1,5 +1,6 @@
 // 전역 필터바: 기간 / 호텔·지점 / 세그먼트. 대시보드·예약 리스트 화면에서 공용으로 사용.
 import { usePredictionFilters, PERIOD_OPTIONS } from "src/view/prediction/PredictionFilterContext";
+import { SEGMENT_LABEL } from "src/data/labels";
 
 function FilterBar({ sticky = false }) {
   const {
@@ -33,7 +34,7 @@ function FilterBar({ sticky = false }) {
         onChange={setSegment}
         options={[
           { value: "all", label: "전체 세그먼트" },
-          ...segmentOptions.map((v) => ({ value: v, label: v })),
+          ...segmentOptions.map((v) => ({ value: v, label: SEGMENT_LABEL[v] ?? v })),
         ]}
       />
     </div>
