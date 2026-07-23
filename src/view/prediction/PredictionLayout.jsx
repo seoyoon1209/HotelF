@@ -1,8 +1,3 @@
-// Shared layout for the 4 "cancellation prediction response system" screens (dashboard / reservation list / detail + simulator / report).
-// Reservations, predictions, action history, and model info are all fetched from the real backend/DB.
-// The one exception is the simulator's "after adjustment" probability, which is not a real ML
-// re-inference but a simple arithmetic approximation computed on the frontend (the backend has no
-// what-if re-inference endpoint yet).
 import { NavLink, Outlet, useParams } from "react-router-dom";
 import { ToastProvider } from "src/components/prediction/ToastProvider";
 import { PredictionFilterProvider } from "src/view/prediction/PredictionFilterContext";

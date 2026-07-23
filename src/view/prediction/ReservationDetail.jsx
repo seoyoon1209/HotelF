@@ -1,28 +1,4 @@
-// 3. Reservation detail + simulator: adjust an intervention (discount coupon / breakfast coupon) → compare Before/After predictions.
-// The "AI Strategy Suggestions" section (related-factor analysis / recommended marketing scenarios, a real LLM call)
-// originally lived on a separate AI demo page, but showing the same reservation split across two screens was
-// redundant, so it was merged into this detail page.
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import {
-  FaArrowLeft,
-  FaPlay,
-  FaLightbulb,
-  FaTicket,
-  FaCheck,
-  FaMagnifyingGlassChart,
-  FaWandMagicSparkles,
-} from "react-icons/fa6";
-import PredictionBadge from "src/components/prediction/PredictionBadge";
-import { useToast } from "src/components/prediction/ToastProvider";
-import { simulateProbability, estimateCost } from "src/data/predictionDemoData";
-import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
-import { createReservationAction, deleteReservationActions } from "src/api/reservationActionApi";
-import { createPrediction } from "src/api/predictionApi";
-import { getAiInsight } from "src/api/aiInsightApi";
-import { DEPOSIT_LABEL, SEGMENT_LABEL, MEAL_LABEL } from "src/data/labels";
-import LoadingState from "src/components/common/LoadingState";
-import { formatUSD } from "src/data/currency";
+//Reservation detail + simulator
 
 const COMBOS = [
   { key: "none", title: "Do Nothing", discountPercent: 0, breakfastCoupon: false },

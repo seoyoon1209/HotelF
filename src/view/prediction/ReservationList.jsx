@@ -1,4 +1,4 @@
-// 2. Reservation list: search / status filter / sort / bulk simulation / pagination.
+//Reservation list
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaMagnifyingGlass, FaPlay } from "react-icons/fa6";

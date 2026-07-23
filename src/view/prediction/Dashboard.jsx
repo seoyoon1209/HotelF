@@ -1,4 +1,4 @@
-// 1. Dashboard (home): KPI summary + predicted-cancellation ratio donut + per-segment predicted-cancellation ranking.
+//Dashboard (home)
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa6";

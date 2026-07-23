@@ -1,5 +1,3 @@
-// Reservation data shared between the dashboard and reservation list, plus global filter bar state (period, hotel branch, segment).
-// The reservation list is loaded from the real backend (GET /api/reservations/).
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getReservations } from "src/api/reservationApi";
 import { transformReservation } from "src/data/transformReservation";

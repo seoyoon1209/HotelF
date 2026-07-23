@@ -1,4 +1,4 @@
-// 4. Report: action history by period + CSV export + model version/update timestamp. All queried from the real backend.
+//Report,CSV export + model
 import { useEffect, useState } from "react";
 import { FaDownload, FaCircleInfo } from "react-icons/fa6";
 import { useToast } from "src/components/prediction/ToastProvider";
@@ -16,7 +16,6 @@ function csvCell(value) {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-// Turns a detailed export row (one reservation) into a CSV line array.
 function toDetailRow(r) {
   const consulted = r.consulted;
   const consultedAt = consulted && r.applied_at ? new Date(r.applied_at).toLocaleString() : "-";
@@ -114,12 +113,14 @@ function Report() {
     };
   }, []);
 
+  const consultedRows = exportRows.filter((r) => r.consulted);
+
   const totalActions = rows.reduce((sum, row) => sum + row.actions_taken, 0);
   const totalFlipped = rows.reduce((sum, row) => sum + row.label_flipped, 0);
   const successRate = totalActions === 0 ? 0 : totalFlipped / totalActions;
 
   const handleExport = () => {
-    downloadCsv(exportRows);
+    downloadCsv(consultedRows);
     showToast({ title: "CSV download complete", message: "hoteling_consulting_detail.csv", tone: "success" });
   };
 
@@ -133,7 +134,7 @@ function Report() {
         <button
           type="button"
           onClick={handleExport}
-          disabled={exportRows.length === 0}
+          disabled={consultedRows.length === 0}
           className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40"
         >
           <FaDownload className="h-3.5 w-3.5" />
