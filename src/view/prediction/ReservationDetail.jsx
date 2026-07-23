@@ -1,13 +1,23 @@
 // 3. 예약 상세 + 시뮬레이터: 개입(할인쿠폰/조식쿠폰) 조작 → Before/After 예측 비교.
+// "AI 전략 제안"(연관 요인 분석/추천 마케팅 시나리오, 실제 LLM 호출)은 원래 별도 AI 데모 페이지에
+// 있었으나, 같은 예약을 두 화면에서 나눠 보여주는 게 중복이라 이 상세 페이지로 합쳤다.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { FaArrowLeft, FaPlay, FaLightbulb, FaTicket } from "react-icons/fa6";
+import {
+  FaArrowLeft,
+  FaPlay,
+  FaLightbulb,
+  FaTicket,
+  FaMagnifyingGlassChart,
+  FaWandMagicSparkles,
+} from "react-icons/fa6";
 import PredictionBadge from "src/components/prediction/PredictionBadge";
 import { useToast } from "src/components/prediction/ToastProvider";
 import { simulateProbability, estimateCost } from "src/data/predictionDemoData";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
 import { createReservationAction } from "src/api/reservationActionApi";
 import { createPrediction } from "src/api/predictionApi";
+import { getAiInsight } from "src/api/aiInsightApi";
 import LoadingState from "src/components/common/LoadingState";
 
 const COMBOS = [
@@ -31,6 +41,9 @@ function ReservationDetail() {
   const [applied, setApplied] = useState(reservation?.action_status === "DONE");
   const [running, setRunning] = useState(false);
   const [applying, setApplying] = useState(false);
+  const [insight, setInsight] = useState(null);
+  const [insightLoading, setInsightLoading] = useState(false);
+  const [insightError, setInsightError] = useState(false);
 
   const cost = useMemo(() => {
     if (!reservation) return null;
@@ -61,6 +74,28 @@ function ReservationDetail() {
         // 모델이 아직 준비되지 않은 환경(로컬 등)일 수 있음 - 배지가 "예측 없음"으로 남는다.
       });
   }, [reservation, applyPrediction]);
+
+  // AI 전략 제안(연관 요인/추천 시나리오)은 실제 LLM 호출이라 예약당 한 번만 불러온다.
+  useEffect(() => {
+    if (!reservation) return;
+    let cancelled = false;
+    setInsight(null);
+    setInsightError(false);
+    setInsightLoading(true);
+    getAiInsight(reservation.reservation_id)
+      .then((res) => {
+        if (!cancelled) setInsight(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setInsightError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setInsightLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [reservation?.reservation_id]);
 
   if (loading) {
     return <LoadingState />;
@@ -154,6 +189,55 @@ function ReservationDetail() {
                 <FeatureChip label={`market_segment = ${reservation.market_segment}`} />
               </div>
             </div>
+          </div>
+
+          {/* AI 전략 제안: 연관 요인 분석 + 추천 마케팅 시나리오 (실제 LLM 호출) */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6">
+            <div className="flex items-center gap-2 text-brand">
+              <FaWandMagicSparkles className="h-4 w-4" />
+              <h2 className="font-semibold">AI 전략 제안</h2>
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 text-slate-900">
+              <FaMagnifyingGlassChart className="h-4 w-4 text-slate-400" />
+              <h3 className="text-sm font-semibold">연관 요인 분석</h3>
+            </div>
+            {insightLoading && <p className="mt-2 text-sm text-slate-400">AI가 분석 중입니다...</p>}
+            {insightError && !insightLoading && (
+              <p className="mt-2 text-sm text-red-500">AI 분석을 불러오지 못했습니다.</p>
+            )}
+            {insight && !insightLoading && (
+              <>
+                <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
+                  {insight.factors.map((factor) => (
+                    <li key={factor}>· {factor}</li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-xs text-slate-400">
+                  ※ 아래는 상관관계일 뿐 확정된 취소 원인이 아닙니다.
+                </p>
+
+                <div className="mt-5 flex items-center gap-2 text-slate-900">
+                  <FaLightbulb className="h-4 w-4 text-slate-400" />
+                  <h3 className="text-sm font-semibold">추천 마케팅 시나리오</h3>
+                </div>
+                <div className="mt-2 space-y-2">
+                  {insight.scenarios.map((scenario, i) => (
+                    <div key={scenario.title} className="rounded-xl bg-blue-50 p-3">
+                      <div className="text-xs font-semibold text-blue-900">
+                        {i + 1}. {scenario.title}
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-blue-800">"{scenario.message}"</p>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-500">
+                  <strong className="text-slate-700">Human-in-the-loop:</strong> 이 제안은 AI(LLM)가
+                  생성했습니다. 최종 발송 전 담당 직원의 검토 및 승인이 필요합니다.
+                </p>
+              </>
+            )}
           </div>
 
           {/* 조합 비교 테이블 */}

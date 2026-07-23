@@ -93,11 +93,11 @@ function LandingPage() {
             실제 서비스 들어가기
           </Link>
           <Link
-            to="/demo"
+            to="/prediction"
             className="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:bg-slate-200"
           >
             <FaRobot className="h-5 w-5" />
-            AI 맞춤형 고객 관리 데모
+            취소 예측 AI 데모
           </Link>
         </div>
 
