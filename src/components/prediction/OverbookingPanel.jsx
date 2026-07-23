@@ -1,4 +1,4 @@
-// 오버부킹 지원 페이지 (직원 판단용)
+// Overbooking support page (for staff decision-making)
 import { useEffect, useMemo, useState } from "react";
 import { FaLayerGroup, FaCircleExclamation } from "react-icons/fa6";
 import { getOverbookingSummary } from "src/api/overbookingApi";
@@ -31,24 +31,24 @@ function OverbookingPanel() {
     <div>
       <div className="flex items-center gap-2">
         <FaLayerGroup className="h-5 w-5 text-brand" />
-        <h1 className="text-2xl font-semibold text-slate-900">오버부킹 지원</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">Overbooking Support</h1>
       </div>
       <p className="mt-1 text-sm text-slate-500">
-        날짜별 예상 취소 건수를 기준으로 추가 예약 허용 범위를 추천합니다. 참고용 수치이며 최종
-        판단은 직원이 합니다.
+        Recommends an allowable range for additional bookings based on the expected cancellation
+        count for each date. These figures are for reference only — final decisions are made by staff.
       </p>
 
       {!loading && !error && summary.length > 0 && (
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard label="향후 30일 예약 건수" value={`${stats.totalReservations.toLocaleString()}건`} />
+          <StatCard label="Reservations, Next 30 Days" value={stats.totalReservations.toLocaleString()} />
           <StatCard
-            label="향후 30일 예상 취소"
-            value={`${stats.expectedCancellations.toFixed(1)}건`}
+            label="Expected Cancellations, Next 30 Days"
+            value={stats.expectedCancellations.toFixed(1)}
             accent="text-orange-600"
           />
           <StatCard
-            label="추가 예약 추천 합계"
-            value={`${stats.recommendedBookings.toLocaleString()}건`}
+            label="Total Recommended Additional Bookings"
+            value={stats.recommendedBookings.toLocaleString()}
             accent="text-blue-700"
           />
         </div>
@@ -60,14 +60,14 @@ function OverbookingPanel() {
         <div className="mt-6 flex flex-col items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
           <FaCircleExclamation className="h-5 w-5" />
           <span className="text-sm">
-            오버부킹 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요.
+            Failed to load overbooking data. Please check that the backend server is running.
           </span>
         </div>
       )}
 
       {!loading && !error && (
         <>
-          {/* 모바일: 카드 목록 */}
+          {/* Mobile: card list */}
           <div className="mt-5 space-y-3 sm:hidden">
             {summary.map((day) => (
               <DayCard key={day.check_in_date} day={day} />
@@ -75,39 +75,39 @@ function OverbookingPanel() {
             {summary.length === 0 && <EmptyState />}
           </div>
 
-          {/* 데스크톱: 테이블 */}
+          {/* Desktop: table */}
           <div className="mt-5 hidden overflow-hidden rounded-2xl border border-slate-200 bg-white sm:block">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 text-slate-500">
-                  <th className="px-4 py-3 font-medium">체크인 날짜</th>
-                  <th className="px-4 py-3 font-medium">예약 건수</th>
-                  <th className="px-4 py-3 font-medium">예상 취소 건수</th>
-                  <th className="px-4 py-3 font-medium">고위험 건수</th>
-                  <th className="px-4 py-3 font-medium">추가 예약 추천</th>
+                  <th className="px-4 py-3 font-medium">Check-in Date</th>
+                  <th className="px-4 py-3 font-medium">Reservations</th>
+                  <th className="px-4 py-3 font-medium">Expected Cancellations</th>
+                  <th className="px-4 py-3 font-medium">High Risk</th>
+                  <th className="px-4 py-3 font-medium">Recommended Additional Bookings</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {summary.map((day) => (
                   <tr key={day.check_in_date} className="transition hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium text-slate-900">{day.check_in_date}</td>
-                    <td className="px-4 py-3 text-slate-600">{day.total_reservations}건</td>
+                    <td className="px-4 py-3 text-slate-600">{day.total_reservations}</td>
                     <td className="px-4 py-3 text-slate-600">
-                      {Number(day.expected_cancellations).toFixed(1)}건
+                      {Number(day.expected_cancellations).toFixed(1)}
                     </td>
                     <td className="px-4 py-3">
                       {day.high_risk_count > 0 ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/20">
                           <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-                          {day.high_risk_count}건
+                          {day.high_risk_count}
                         </span>
                       ) : (
-                        <span className="text-slate-400">0건</span>
+                        <span className="text-slate-400">0</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-blue-50 px-2.5 py-1 font-semibold text-blue-700">
-                        +{day.recommended_additional_bookings}건
+                        +{day.recommended_additional_bookings}
                       </span>
                     </td>
                   </tr>
@@ -115,7 +115,7 @@ function OverbookingPanel() {
                 {summary.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-4 py-12 text-center text-slate-400">
-                      표시할 데이터가 없습니다.
+                      No data to display.
                     </td>
                   </tr>
                 )}
@@ -142,13 +142,13 @@ function DayCard({ day }) {
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <div className="flex items-center justify-between">
         <span className="font-medium text-slate-900">{day.check_in_date}</span>
-        <span className="text-sm text-slate-500">예약 {day.total_reservations}건</span>
+        <span className="text-sm text-slate-500">Reservations {day.total_reservations}</span>
       </div>
       <div className="mt-1.5 text-sm text-slate-600">
-        예상 취소 {Number(day.expected_cancellations).toFixed(1)}건 (고위험 {day.high_risk_count}건)
+        Expected cancellations {Number(day.expected_cancellations).toFixed(1)} (high risk {day.high_risk_count})
       </div>
       <div className="mt-2 inline-block rounded-full bg-blue-50 px-2.5 py-1 text-sm font-medium text-blue-700">
-        추가 예약 추천 +{day.recommended_additional_bookings}건
+        Recommended additional bookings +{day.recommended_additional_bookings}
       </div>
     </div>
   );
@@ -157,7 +157,7 @@ function DayCard({ day }) {
 function EmptyState() {
   return (
     <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-      표시할 데이터가 없습니다.
+      No data to display.
     </div>
   );
 }

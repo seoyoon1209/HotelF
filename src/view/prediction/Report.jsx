@@ -1,4 +1,4 @@
-// 4. 리포트: 기간별 조치 이력 + CSV export + 모델 버전/업데이트 일시. 전부 실제 백엔드에서 조회.
+// 4. Report: action history by period + CSV export + model version/update timestamp. All queried from the real backend.
 import { useEffect, useState } from "react";
 import { FaDownload, FaCircleInfo } from "react-icons/fa6";
 import { useToast } from "src/components/prediction/ToastProvider";
@@ -9,14 +9,14 @@ import LoadingState from "src/components/common/LoadingState";
 const REPORT_WEEKS = 8;
 
 function downloadCsv(rows) {
-  const header = ["기간", "조치 건수", "라벨 전환 성공"];
+  const header = ["Period", "Actions Taken", "Label Flip Successes"];
   const body = rows.map((row) => [`${row.period_start} ~ ${row.period_end}`, row.actions_taken, row.label_flipped]);
   const csv = [header, ...body].map((r) => r.join(",")).join("\n");
   const blob = new Blob([`﻿${csv}`], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "cancelguard_action_history.csv";
+  link.download = "hoteling_action_history.csv";
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -56,15 +56,15 @@ function Report() {
 
   const handleExport = () => {
     downloadCsv(rows);
-    showToast({ title: "CSV 다운로드 완료", message: "cancelguard_action_history.csv", tone: "success" });
+    showToast({ title: "CSV download complete", message: "hoteling_action_history.csv", tone: "success" });
   };
 
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-lg font-bold text-slate-900">기간별 조치 이력</h1>
-          <p className="mt-0.5 text-sm text-slate-400">조치 건수 대비 라벨 전환(취소예상 → 미취소예상) 성공 건수</p>
+          <h1 className="text-lg font-bold text-slate-900">Action History by Period</h1>
+          <p className="mt-0.5 text-sm text-slate-400">Successful label flips (predicted cancellation → predicted keep) out of actions taken</p>
         </div>
         <button
           type="button"
@@ -73,13 +73,13 @@ function Report() {
           className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40"
         >
           <FaDownload className="h-3.5 w-3.5" />
-          CSV로 내보내기
+          Export CSV
         </button>
       </div>
 
       {error && (
         <div className="mt-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          리포트 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요.
+          Failed to load report data. Please check that the backend server is running.
         </div>
       )}
 
@@ -89,19 +89,19 @@ function Report() {
         !error && (
           <>
             <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <SummaryCard label="총 조치 건수" value={`${totalActions.toLocaleString()}건`} />
-              <SummaryCard label="라벨 전환 성공" value={`${totalFlipped.toLocaleString()}건`} accent="text-green-600" />
-              <SummaryCard label="전환 성공률" value={`${(successRate * 100).toFixed(1)}%`} accent="text-brand" />
+              <SummaryCard label="Total Actions Taken" value={totalActions.toLocaleString()} />
+              <SummaryCard label="Label Flip Successes" value={totalFlipped.toLocaleString()} accent="text-green-600" />
+              <SummaryCard label="Success Rate" value={`${(successRate * 100).toFixed(1)}%`} accent="text-brand" />
             </div>
 
             <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 text-slate-500">
-                    <th className="px-5 py-3 font-medium">기간</th>
-                    <th className="px-5 py-3 font-medium">조치 건수</th>
-                    <th className="px-5 py-3 font-medium">라벨 전환 성공</th>
-                    <th className="px-5 py-3 font-medium">전환율</th>
+                    <th className="px-5 py-3 font-medium">Period</th>
+                    <th className="px-5 py-3 font-medium">Actions Taken</th>
+                    <th className="px-5 py-3 font-medium">Label Flip Successes</th>
+                    <th className="px-5 py-3 font-medium">Success Rate</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -110,8 +110,8 @@ function Report() {
                       <td className="px-5 py-3 font-medium text-slate-900">
                         {row.period_start} ~ {row.period_end}
                       </td>
-                      <td className="px-5 py-3 text-slate-600">{row.actions_taken}건</td>
-                      <td className="px-5 py-3 text-slate-600">{row.label_flipped}건</td>
+                      <td className="px-5 py-3 text-slate-600">{row.actions_taken}</td>
+                      <td className="px-5 py-3 text-slate-600">{row.label_flipped}</td>
                       <td className="px-5 py-3 text-slate-600">
                         {row.actions_taken === 0 ? "-" : `${((row.label_flipped / row.actions_taken) * 100).toFixed(1)}%`}
                       </td>
@@ -120,7 +120,7 @@ function Report() {
                   {rows.length === 0 && (
                     <tr>
                       <td colSpan={4} className="px-5 py-10 text-center text-slate-400">
-                        아직 조치 이력이 없습니다. 예약 상세에서 "실제 적용"을 하면 여기에 집계됩니다.
+                        No action history yet. Actions recorded from "Apply" on a reservation's detail page will show up here.
                       </td>
                     </tr>
                   )}
@@ -133,18 +133,18 @@ function Report() {
                 <FaCircleInfo className="h-4 w-4 shrink-0 text-slate-400" />
                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-slate-600">
                   <span>
-                    모델 버전 <b className="text-slate-900">{modelInfo.model_name}-{modelInfo.model_version}</b>
+                    Model Version <b className="text-slate-900">{modelInfo.model_name}-{modelInfo.model_version}</b>
                   </span>
                   <span>
-                    최근 예측 일시{" "}
+                    Last Predicted At{" "}
                     <b className="text-slate-900">{new Date(modelInfo.updated_at).toLocaleString()}</b>
                   </span>
                   <span>
-                    참고 정확도{" "}
+                    Reference Accuracy{" "}
                     <b className="text-slate-900">
                       {modelInfo.accuracy == null
-                        ? "데이터 부족"
-                        : `${Math.round(modelInfo.accuracy * 100)}% (완료·취소 ${modelInfo.sample_size}건 기준)`}
+                        ? "Insufficient data"
+                        : `${Math.round(modelInfo.accuracy * 100)}% (based on ${modelInfo.sample_size} completed/cancelled reservations)`}
                     </b>
                   </span>
                 </div>

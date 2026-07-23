@@ -1,5 +1,5 @@
-// 대시보드/예약 리스트에서 공유하는 예약 데이터 + 전역 필터바 상태 (기간, 호텔/지점, 세그먼트).
-// 예약 목록은 실제 백엔드(GET /api/reservations/)에서 불러온다.
+// Reservation data shared between the dashboard and reservation list, plus global filter bar state (period, hotel branch, segment).
+// The reservation list is loaded from the real backend (GET /api/reservations/).
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getReservations } from "src/api/reservationApi";
 import { transformReservation } from "src/data/transformReservation";
@@ -7,10 +7,10 @@ import { transformReservation } from "src/data/transformReservation";
 const FilterContext = createContext(null);
 
 export const PERIOD_OPTIONS = [
-  { value: "all", label: "전체 기간" },
-  { value: "7", label: "체크인 7일 이내" },
-  { value: "14", label: "체크인 14일 이내" },
-  { value: "30", label: "체크인 30일 이내" },
+  { value: "all", label: "All Time" },
+  { value: "7", label: "Check-in within 7 days" },
+  { value: "14", label: "Check-in within 14 days" },
+  { value: "30", label: "Check-in within 30 days" },
 ];
 
 export function PredictionFilterProvider({ children }) {

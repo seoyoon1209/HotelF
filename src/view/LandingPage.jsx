@@ -1,14 +1,14 @@
-// 시스템 소개. toss.im 참고 — 밝은 배경 + 큼직한 볼드 타이포 + 스크롤 리빌 섹션 구성.
+// System introduction page. Inspired by toss.im — light background + large bold typography + scroll-reveal sections.
 import { Link } from "react-router-dom";
 import { FaHotel, FaChartLine, FaRobot, FaUserTie, FaUser, FaBriefcase } from "react-icons/fa6";
 import Reveal from "src/components/common/Reveal";
 
-const AI_FLOW = ["AI가 취소 확률을 예측", "LLM이 사람이 이해하기 쉬운 문장으로 변환", "직원이 최종 확인 후 실행"];
+const AI_FLOW = ["AI predicts cancellation probability", "LLM converts it into an easy-to-understand sentence", "Staff review and take final action"];
 
-const TITLE_LINES = ["호텔 예약 취소,", "미리 알면 막을 수 있습니다"];
+const TITLE_LINES = ["Hoteling"];
 const CHAR_DELAY_MS = 55;
 
-// 제목을 한 글자씩 순서대로 나타내기 위해, 줄바꿈을 포함한 전체 글자에 순번을 매긴다.
+// Assigns a sequence number to every character (including line breaks) so the title can appear one character at a time.
 function TypingTitle({ lines }) {
   let charIndex = 0;
 
@@ -25,7 +25,7 @@ function TypingTitle({ lines }) {
                 style={{ animationDelay: `${delay}ms` }}
                 className="inline-block animate-char-in"
               >
-                {char === " " ? " " : char}
+                {char === " " ? " " : char}
               </span>
             );
           })}
@@ -36,29 +36,29 @@ function TypingTitle({ lines }) {
 }
 
 const MVP_FEATURES = [
-  { title: "취소 위험도 표시", desc: "예약별 취소 확률을 낮음·보통·높음으로 표시 (참고용, 모델 정확도 약 78%)" },
-  { title: "선제적 고객 관리", desc: "고위험 예약에 재확인 연락·일정 변경·업그레이드 등 조치를 제안" },
-  { title: "오버부킹 지원", desc: "날짜별 예상 취소량을 기반으로 추가 예약 허용 범위를 추천" },
+  { title: "Cancellation Risk Display", desc: "Shows each reservation's cancellation probability as Low, Medium, or High (for reference only, model accuracy roughly 78%)" },
+  { title: "Proactive Guest Care", desc: "Suggests actions for high-risk reservations, such as a follow-up call, date change, or upgrade" },
+  { title: "Overbooking Support", desc: "Recommends an allowable range for additional bookings based on expected cancellations by date" },
 ];
 
 const STAKEHOLDERS = [
-  { title: "호텔", desc: "공실과 매출 손실을 줄이고 객실 운영 효율을 높입니다.", icon: FaHotel },
-  { title: "직원", desc: "관리가 필요한 예약의 우선순위를 빠르게 파악할 수 있습니다.", icon: FaUserTie },
-  { title: "고객", desc: "강제 취소 대신 일정 변경 등 더 유연한 선택지를 제공받습니다.", icon: FaUser },
-  { title: "경영진", desc: "취소 원인을 데이터로 파악해 가격·판매·예약 정책을 개선합니다.", icon: FaBriefcase },
+  { title: "Hotel", desc: "Reduces vacancy and lost revenue while improving room operations efficiency.", icon: FaHotel },
+  { title: "Staff", desc: "Quickly identifies which reservations need priority attention.", icon: FaUserTie },
+  { title: "Guest", desc: "Offers more flexible options, like a date change, instead of a forced cancellation.", icon: FaUser },
+  { title: "Management", desc: "Understands the causes of cancellations through data to improve pricing, sales, and reservation policy.", icon: FaBriefcase },
 ];
 
 const ROADMAP = [
   {
-    stage: "2단계",
-    items: ["대기 고객 자동 연결 / 재판매 준비", "가격·환불 정책 최적화 (위험도별 보증금·무료취소 기한 차등)"],
+    stage: "Phase 2",
+    items: ["Automatic waitlist matching / resale preparation", "Optimized pricing and refund policy (deposit and free-cancellation windows tiered by risk level)"],
   },
   {
-    stage: "3단계",
+    stage: "Phase 3",
     items: [
-      "취소 반영 실질 점유율·매출 예측",
-      "운영 대시보드 (위험 요인은 상관관계일 뿐 원인은 아님)",
-      "취소율 낮은 고객군·채널 대상 마케팅 효율 개선",
+      "Predicting actual occupancy and revenue net of cancellations",
+      "Operations dashboard (risk factors are correlations only, not causes)",
+      "Improved marketing efficiency targeting low-cancellation customer groups and channels",
     ],
   },
 ];
@@ -66,22 +66,23 @@ const ROADMAP = [
 function LandingPage() {
   return (
     <div className="bg-white text-slate-900">
-      {/* 히어로 */}
+      {/* Hero */}
       <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col items-center justify-center px-4 py-20 text-center sm:px-6">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-4 py-1.5 text-base font-medium text-brand">
           <FaHotel className="h-4 w-4" />
-          호텔 운영을 위한 B2B 의사결정 지원 서비스
+          A B2B decision-support service for hotel operations
         </span>
 
-        {/* 한 글자씩 순서대로 나타남 (글자별 animationDelay는 TypingTitle에서 계산) */}
+        {/* Appears one character at a time (per-character animationDelay is computed in TypingTitle) */}
         <h1 className="mt-7 text-5xl leading-tight font-extrabold tracking-tight text-slate-900 sm:text-7xl">
           <TypingTitle lines={TITLE_LINES} />
         </h1>
 
-        {/* 마지막 글자가 다 나타난 뒤 자동으로 나타남 */}
+        {/* Appears automatically once the last character has finished animating in */}
         <p className="mt-7 max-w-2xl animate-fade-in-up text-xl leading-relaxed text-slate-500 [animation-delay:1.75s] sm:text-2xl">
-          예약 데이터를 활용해 고객의 취소 가능성을 사전에 예측하고, 적절한 고객 관리와 객실
-          재판매 전략을 통해 호텔의 점유율과 매출을 높이는 의사결정 지원 서비스입니다.
+          A decision-support service that uses reservation data to predict guest cancellations in
+          advance, and increases hotel occupancy and revenue through proactive guest care and room
+          resale strategies.
         </p>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
@@ -90,14 +91,14 @@ function LandingPage() {
             className="flex items-center justify-center gap-2 rounded-2xl bg-brand px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-brand-dark"
           >
             <FaChartLine className="h-5 w-5" />
-            실제 서비스 들어가기
+            Go to the Live Service
           </Link>
           <Link
             to="/prediction"
             className="flex items-center justify-center gap-2 rounded-2xl bg-slate-100 px-8 py-4 text-lg font-semibold text-slate-700 transition hover:bg-slate-200"
           >
             <FaRobot className="h-5 w-5" />
-            취소 예측 AI 데모
+            Cancellation Prediction AI Demo
           </Link>
         </div>
 
@@ -111,13 +112,13 @@ function LandingPage() {
         </div>
       </div>
 
-      {/* 핵심 기능 (MVP) */}
+      {/* Core features (MVP) */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <Reveal className="text-center">
-            <span className="text-base font-semibold text-brand">1단계 MVP</span>
+            <span className="text-base font-semibold text-brand">Phase 1 MVP</span>
             <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-              지금 바로 쓸 수 있는 핵심 기능
+              Core Features Ready to Use Now
             </h2>
           </Reveal>
           <div className="mt-12 grid gap-4 text-left sm:grid-cols-3">
@@ -135,13 +136,13 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 이해관계자별 가치 */}
+      {/* Value by stakeholder */}
       <section className="py-24">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <Reveal className="text-center">
             <span className="text-base font-semibold text-brand">Why it matters</span>
             <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-              이해관계자별로 다른 가치를 전달합니다
+              Delivering different value to each stakeholder
             </h2>
           </Reveal>
           <div className="mt-12 grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
@@ -160,13 +161,13 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 로드맵 */}
+      {/* Roadmap */}
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <Reveal className="text-center">
             <span className="text-base font-semibold text-brand">Roadmap</span>
             <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-              앞으로의 계획
+              What's Next
             </h2>
           </Reveal>
           <div className="mt-12 grid gap-4 text-left sm:grid-cols-2">
@@ -177,7 +178,7 @@ function LandingPage() {
                 className="rounded-3xl bg-white p-7 shadow-sm ring-1 ring-slate-100"
               >
                 <span className="inline-block rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-brand">
-                  {stage.stage} 예정
+                  {stage.stage}
                 </span>
                 <ul className="mt-4 space-y-2.5 text-base text-slate-500">
                   {stage.items.map((item) => (
@@ -190,19 +191,20 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* 클로징 */}
+      {/* Closing */}
       <section className="bg-slate-900 px-4 py-28 text-center text-white sm:px-6">
         <Reveal>
           <blockquote className="mx-auto max-w-2xl text-2xl leading-relaxed font-medium text-slate-100 sm:text-4xl">
-            "예약 데이터를 활용해 고객의 취소 가능성을 사전에 예측하고, 적절한 고객 관리와 객실
-            재판매 전략을 통해 호텔의 점유율과 매출을 높이는 의사결정 지원 서비스"
+            "A decision-support service that uses reservation data to predict guest cancellations
+            in advance, and increases hotel occupancy and revenue through proactive guest care and
+            room resale strategies"
           </blockquote>
           <Link
             to="/dashboard"
             className="mt-10 inline-flex items-center justify-center gap-2 rounded-2xl bg-brand px-8 py-4 text-lg font-semibold text-white shadow-lg shadow-blue-500/25 transition hover:bg-brand-dark"
           >
             <FaChartLine className="h-5 w-5" />
-            지금 시작하기
+            Get Started Now
           </Link>
         </Reveal>
       </section>

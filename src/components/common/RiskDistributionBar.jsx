@@ -1,9 +1,9 @@
-// 예약들의 위험도 구성비를 보여주는 part-to-whole 차트.
+// Part-to-whole chart showing the risk-level breakdown of reservations.
 const SEGMENTS = [
-  { key: "LOW", label: "낮음", color: "#0ca30c" },
-  { key: "MEDIUM", label: "보통", color: "#fab219" },
-  { key: "HIGH", label: "높음", color: "#d03b3b" },
-  { key: "none", label: "예측 없음", color: "#c3c2b7" },
+  { key: "LOW", label: "Low", color: "#0ca30c" },
+  { key: "MEDIUM", label: "Medium", color: "#fab219" },
+  { key: "HIGH", label: "High", color: "#d03b3b" },
+  { key: "none", label: "No prediction", color: "#c3c2b7" },
 ];
 
 function RiskDistributionBar({ counts }) {
@@ -19,7 +19,7 @@ function RiskDistributionBar({ counts }) {
   );
 
   if (total === 0) {
-    return <p className="text-sm text-slate-500">표시할 예약이 없습니다.</p>;
+    return <p className="text-sm text-slate-500">No reservations to display.</p>;
   }
 
   return (
@@ -29,7 +29,7 @@ function RiskDistributionBar({ counts }) {
           <div
             key={seg.key}
             style={{ width: `${(seg.count / total) * 100}%`, backgroundColor: seg.color }}
-            title={`${seg.label} ${seg.count}건`}
+            title={`${seg.label} ${seg.count} reservations`}
           />
         ))}
       </div>
@@ -41,7 +41,7 @@ function RiskDistributionBar({ counts }) {
               style={{ backgroundColor: seg.color }}
               aria-hidden="true"
             />
-            {seg.label} {seg.count}건 ({Math.round((seg.count / total) * 100)}%)
+            {seg.label} {seg.count} ({Math.round((seg.count / total) * 100)}%)
           </div>
         ))}
       </div>

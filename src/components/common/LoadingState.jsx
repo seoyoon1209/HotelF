@@ -1,7 +1,7 @@
-// 로딩 중임을 시각적으로 보여주는 공용 컴포넌트
+// Shared component that visually indicates a loading state
 import { FaCircleNotch } from "react-icons/fa6";
 
-function LoadingState({ label = "불러오는 중...", inline = false, className = "" }) {
+function LoadingState({ label = "Loading...", inline = false, className = "" }) {
   if (inline) {
     return (
       <span className={`inline-flex items-center gap-2 text-slate-400 ${className}`}>

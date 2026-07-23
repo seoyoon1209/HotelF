@@ -1,11 +1,11 @@
-// 예약 상태(reservation_status) 배지.
+// Reservation status (reservation_status) badge.
 const STATUS_STYLE = {
-  PENDING: { label: "대기", className: "bg-slate-100 text-slate-600 ring-slate-500/20" },
-  CONFIRMED: { label: "확정", className: "bg-blue-50 text-blue-700 ring-blue-600/20" },
-  CHECKED_IN: { label: "체크인", className: "bg-teal-50 text-teal-700 ring-teal-600/20" },
-  COMPLETED: { label: "완료", className: "bg-green-50 text-green-700 ring-green-600/20" },
-  CANCELLED: { label: "취소", className: "bg-red-50 text-red-700 ring-red-600/20" },
-  NO_SHOW: { label: "노쇼", className: "bg-orange-50 text-orange-700 ring-orange-600/20" },
+  PENDING: { label: "Pending", className: "bg-slate-100 text-slate-600 ring-slate-500/20" },
+  CONFIRMED: { label: "Confirmed", className: "bg-blue-50 text-blue-700 ring-blue-600/20" },
+  CHECKED_IN: { label: "Checked In", className: "bg-teal-50 text-teal-700 ring-teal-600/20" },
+  COMPLETED: { label: "Completed", className: "bg-green-50 text-green-700 ring-green-600/20" },
+  CANCELLED: { label: "Cancelled", className: "bg-red-50 text-red-700 ring-red-600/20" },
+  NO_SHOW: { label: "No Show", className: "bg-orange-50 text-orange-700 ring-orange-600/20" },
 };
 
 function StatusBadge({ status }) {

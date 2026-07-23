@@ -1,4 +1,4 @@
-// 예약별 최신 취소 예측 결과(위험도 요약 + 위험도 구성비 + 고위험 예약 테이블)
+// Latest cancellation prediction results per reservation (risk summary + risk breakdown + high-risk reservation table)
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -15,9 +15,9 @@ import RiskDistributionBar from "src/components/common/RiskDistributionBar";
 import LoadingState from "src/components/common/LoadingState";
 
 const RISK_CHIPS = [
-  { value: "all", label: "전체" },
-  { value: "HIGH", label: "높음" },
-  { value: "CRITICAL", label: "매우 위험" },
+  { value: "all", label: "All" },
+  { value: "HIGH", label: "High" },
+  { value: "CRITICAL", label: "Critical" },
 ];
 
 function PredictionDashboard() {
@@ -77,15 +77,15 @@ function PredictionDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900">취소 예측 대시보드</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Cancellation Prediction Dashboard</h1>
       <p className="mt-1 text-sm text-slate-500">
-        아래 위험도는 참고용 예측치입니다
-        {modelInfo?.accuracy != null && ` (모델 정확도 약 ${Math.round(modelInfo.accuracy * 100)}% 수준)`}.
+        The risk levels below are reference predictions only
+        {modelInfo?.accuracy != null && ` (model accuracy roughly ${Math.round(modelInfo.accuracy * 100)}%)`}.
       </p>
 
       {error && (
         <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요.
+          Failed to load data. Please check that the backend server is running.
         </div>
       )}
 
@@ -96,28 +96,28 @@ function PredictionDashboard() {
           <>
             <div className="mt-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
               <RiskStatCard
-                label="낮음"
+                label="Low"
                 count={counts.LOW}
                 total={reservations.length}
                 icon={FaCircleCheck}
                 color="#0ca30c"
               />
               <RiskStatCard
-                label="보통"
+                label="Medium"
                 count={counts.MEDIUM}
                 total={reservations.length}
                 icon={FaCircleExclamation}
                 color="#fab219"
               />
               <RiskStatCard
-                label="높음"
+                label="High"
                 count={counts.HIGH + counts.CRITICAL}
                 total={reservations.length}
                 icon={FaTriangleExclamation}
                 color="#d03b3b"
               />
               <RiskStatCard
-                label="예측 없음"
+                label="No Prediction"
                 count={counts.none}
                 total={reservations.length}
                 icon={FaCircleQuestion}
@@ -126,7 +126,7 @@ function PredictionDashboard() {
             </div>
 
             <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 className="font-semibold text-slate-900">위험도 구성</h2>
+              <h2 className="font-semibold text-slate-900">Risk Breakdown</h2>
               <div className="mt-4">
                 <RiskDistributionBar counts={counts} />
               </div>
@@ -134,13 +134,13 @@ function PredictionDashboard() {
 
             <div className="mt-8 flex items-center justify-between">
               <h2 className="font-semibold text-slate-900">
-                고위험 예약 <span className="font-normal text-slate-400">({highRiskTotal}건)</span>
+                High-Risk Reservations <span className="font-normal text-slate-400">({highRiskTotal})</span>
               </h2>
               <Link
                 to="/overbooking"
                 className="text-sm font-medium text-brand hover:text-brand-dark hover:underline"
               >
-                오버부킹 지원 보기 →
+                View Overbooking Support →
               </Link>
             </div>
 
@@ -150,7 +150,7 @@ function PredictionDashboard() {
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="예약번호 또는 고객명 검색"
+                  placeholder="Search by reservation number or customer name"
                   className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
@@ -175,8 +175,8 @@ function PredictionDashboard() {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
               >
-                <option value="probability">취소확률 높은순</option>
-                <option value="check_in_date">체크인 임박순</option>
+                <option value="probability">Highest Cancellation Probability</option>
+                <option value="check_in_date">Soonest Check-in</option>
               </select>
             </div>
 
@@ -185,11 +185,11 @@ function PredictionDashboard() {
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-slate-100 text-slate-500">
-                      <th className="px-5 py-3 font-medium">예약번호</th>
-                      <th className="px-5 py-3 font-medium">체크인</th>
+                      <th className="px-5 py-3 font-medium">Reservation No.</th>
+                      <th className="px-5 py-3 font-medium">Check-in</th>
                       <th className="px-5 py-3 font-medium">ADR</th>
-                      <th className="px-5 py-3 font-medium">취소 확률</th>
-                      <th className="px-5 py-3 font-medium">위험도</th>
+                      <th className="px-5 py-3 font-medium">Cancellation Probability</th>
+                      <th className="px-5 py-3 font-medium">Risk Level</th>
                       <th className="px-5 py-3 font-medium"></th>
                     </tr>
                   </thead>
@@ -199,7 +199,7 @@ function PredictionDashboard() {
                         <td className="px-5 py-3 font-medium text-slate-900">{r.reservation_code}</td>
                         <td className="px-5 py-3 text-slate-600">{r.check_in_date}</td>
                         <td className="px-5 py-3 text-slate-600">
-                          {r.adr != null ? `${Number(r.adr).toLocaleString()}원` : "-"}
+                          {r.adr != null ? `₩${Number(r.adr).toLocaleString()}` : "-"}
                         </td>
                         <td className="px-5 py-3 font-semibold text-red-600">
                           {r.cancellation_probability != null
@@ -214,7 +214,7 @@ function PredictionDashboard() {
                             to={`/reservations/${r.reservation_id}`}
                             className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-brand hover:text-brand"
                           >
-                            상세보기
+                            View Details
                           </Link>
                         </td>
                       </tr>
@@ -222,7 +222,7 @@ function PredictionDashboard() {
                     {highRiskReservations.length === 0 && (
                       <tr>
                         <td colSpan={6} className="px-5 py-10 text-center text-slate-400">
-                          {highRiskTotal === 0 ? "현재 고위험 예약이 없습니다." : "조건에 맞는 예약이 없습니다."}
+                          {highRiskTotal === 0 ? "There are no high-risk reservations." : "No reservations match the filters."}
                         </td>
                       </tr>
                     )}
@@ -255,7 +255,6 @@ function RiskStatCard({ label, count, total = 0, icon: Icon, color }) {
           <div className="text-sm font-semibold text-slate-600">{label}</div>
           <div className="mt-1.5 flex items-baseline gap-1.5">
             <span className="text-4xl font-extrabold tracking-tight text-slate-900">{count}</span>
-            <span className="text-sm font-medium text-slate-400">건</span>
           </div>
         </div>
         <span
@@ -270,7 +269,7 @@ function RiskStatCard({ label, count, total = 0, icon: Icon, color }) {
 
       <div className="relative mt-4">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400">전체 {total}건 중</span>
+          <span className="text-slate-400">out of {total} total</span>
           <span className="font-bold" style={{ color }}>
             {percent}%
           </span>

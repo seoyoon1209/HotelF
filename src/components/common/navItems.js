@@ -1,4 +1,4 @@
-//내비게이션 항목 목록.
+// List of navigation items.
 import {
   FaGauge,
   FaClipboardList,
@@ -7,8 +7,8 @@ import {
 } from "react-icons/fa6";
 
 export const NAV_ITEMS = [
-  { to: "/dashboard", label: "대시보드", icon: FaGauge },
-  { to: "/reservations", label: "예약", icon: FaClipboardList },
-  { to: "/overbooking", label: "오버부킹", icon: FaLayerGroup },
-  { to: "/prediction", label: "취소 예측 데모", icon: FaShieldHalved },
+  { to: "/dashboard", label: "Dashboard", icon: FaGauge },
+  { to: "/reservations", label: "Reservations", icon: FaClipboardList },
+  { to: "/overbooking", label: "Overbooking", icon: FaLayerGroup },
+  { to: "/prediction", label: "Cancellation Prediction Demo", icon: FaShieldHalved },
 ];

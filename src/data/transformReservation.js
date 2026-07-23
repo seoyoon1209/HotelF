@@ -1,4 +1,4 @@
-// 백엔드 GET /api/reservations/ 응답을 취소 예측 데모 화면들이 기대하는 형태로 변환
+// Transforms the backend GET /api/reservations/ response into the shape the cancellation prediction demo screens expect
 function computeLeadTime(checkInDateStr) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -20,7 +20,7 @@ export function transformReservation(r) {
   return {
     reservation_id: r.reservation_id,
     reservation_code: r.reservation_code,
-    customer_name: r.customer_name ?? "(고객정보 없음)",
+    customer_name: r.customer_name ?? "(No customer info)",
     hotel_branch: r.hotel_name,
     check_in_date: r.check_in_date,
     check_out_date: r.check_out_date,

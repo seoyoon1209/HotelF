@@ -1,4 +1,4 @@
-// reservation API 호출 모음.
+// Collection of reservation API calls.
 
 import instance from "./axios";
 

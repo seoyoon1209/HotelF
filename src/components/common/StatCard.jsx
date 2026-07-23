@@ -1,4 +1,4 @@
-// 큰 숫자 + 컬러 원형 아이콘 스타일의 통계 카드
+// Stat card with a large number and a colored circular icon
 function StatCard({ label, count, icon: Icon, color }) {
   return (
     <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5">

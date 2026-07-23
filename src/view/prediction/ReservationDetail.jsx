@@ -1,6 +1,7 @@
-// 3. 예약 상세 + 시뮬레이터: 개입(할인쿠폰/조식쿠폰) 조작 → Before/After 예측 비교.
-// "AI 전략 제안"(연관 요인 분석/추천 마케팅 시나리오, 실제 LLM 호출)은 원래 별도 AI 데모 페이지에
-// 있었으나, 같은 예약을 두 화면에서 나눠 보여주는 게 중복이라 이 상세 페이지로 합쳤다.
+// 3. Reservation detail + simulator: adjust an intervention (discount coupon / breakfast coupon) → compare Before/After predictions.
+// The "AI Strategy Suggestions" section (related-factor analysis / recommended marketing scenarios, a real LLM call)
+// originally lived on a separate AI demo page, but showing the same reservation split across two screens was
+// redundant, so it was merged into this detail page.
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -22,10 +23,10 @@ import { DEPOSIT_LABEL, SEGMENT_LABEL, MEAL_LABEL } from "src/data/labels";
 import LoadingState from "src/components/common/LoadingState";
 
 const COMBOS = [
-  { key: "none", title: "아무것도 안함", discountPercent: 0, breakfastCoupon: false },
-  { key: "discount", title: "할인만", breakfastCoupon: false },
-  { key: "breakfast", title: "조식만", discountPercent: 0, breakfastCoupon: true },
-  { key: "both", title: "둘 다", breakfastCoupon: true },
+  { key: "none", title: "Do Nothing", discountPercent: 0, breakfastCoupon: false },
+  { key: "discount", title: "Discount Only", breakfastCoupon: false },
+  { key: "breakfast", title: "Breakfast Only", discountPercent: 0, breakfastCoupon: true },
+  { key: "both", title: "Both", breakfastCoupon: true },
 ];
 
 function ReservationDetail() {
@@ -63,7 +64,7 @@ function ReservationDetail() {
     });
   }, [reservation, discountPercent]);
 
-  // 예측이 아직 없는 예약(risk_label == null)이면 상세 진입 시 실제 모델을 호출해 채워넣는다.
+  // If the reservation has no prediction yet (risk_label == null), call the real model on detail-page entry to fill it in.
   useEffect(() => {
     if (!reservation || reservation.risk_label != null) return;
     if (requestedPredictionRef.current === reservation.reservation_id) return;
@@ -72,11 +73,11 @@ function ReservationDetail() {
     createPrediction(reservation.reservation_id)
       .then((res) => applyPrediction(reservation.reservation_id, Number(res.data.cancellation_probability)))
       .catch(() => {
-        // 모델이 아직 준비되지 않은 환경(로컬 등)일 수 있음 - 배지가 "예측 없음"으로 남는다.
+        // The model may not be available in this environment (e.g. local dev) - the badge stays "No Prediction".
       });
   }, [reservation, applyPrediction]);
 
-  // AI 전략 제안(연관 요인/추천 시나리오)은 실제 LLM 호출이라 예약당 한 번만 불러온다.
+  // AI strategy suggestions (related factors / recommended scenarios) are a real LLM call, so fetch once per reservation.
   useEffect(() => {
     if (!reservation) return;
     let cancelled = false;
@@ -105,10 +106,10 @@ function ReservationDetail() {
   if (!reservation) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
-        예약을 찾을 수 없습니다.
+        Reservation not found.
         <div className="mt-3">
           <Link to="/prediction/reservations" className="text-sm font-medium text-brand hover:underline">
-            예약 리스트로 돌아가기
+            Back to Reservation List
           </Link>
         </div>
       </div>
@@ -117,7 +118,7 @@ function ReservationDetail() {
 
   const runSimulation = () => {
     setRunning(true);
-    showToast({ title: "시뮬레이션 실행 중", tone: "info", duration: 900 });
+    showToast({ title: "Running simulation", tone: "info", duration: 900 });
     window.setTimeout(() => {
       setResult(simulateProbability(reservation, { discountPercent, breakfastCoupon }));
       setRunning(false);
@@ -138,10 +139,10 @@ function ReservationDetail() {
       .then(() => {
         markActionDone(reservation.reservation_id);
         setApplied(true);
-        showToast({ title: "쿠폰 발급 완료", message: "고객에게 쿠폰이 발급되었습니다.", tone: "success" });
+        showToast({ title: "Coupon issued", message: "The coupon has been issued to the guest.", tone: "success" });
       })
       .catch(() => {
-        showToast({ title: "쿠폰 발급 실패", message: "잠시 후 다시 시도해주세요.", tone: "neutral" });
+        showToast({ title: "Failed to issue coupon", message: "Please try again shortly.", tone: "neutral" });
       })
       .finally(() => setApplying(false));
   };
@@ -156,11 +157,11 @@ function ReservationDetail() {
         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
       >
         <FaArrowLeft className="h-3 w-3" />
-        예약 리스트
+        Reservation List
       </button>
 
       <div className="mt-3 grid gap-5 xl:grid-cols-[1.1fr_1fr]">
-        {/* 예약 기본정보 + 현재 피처 + 현재 예측 */}
+        {/* Basic reservation info + current features + current prediction */}
         <div className="space-y-5">
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -172,40 +173,40 @@ function ReservationDetail() {
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-              <InfoField label="체크인" value={reservation.check_in_date} />
-              <InfoField label="체크아웃" value={reservation.check_out_date} />
-              <InfoField label="인원" value={`성인 ${reservation.adults}명${reservation.children ? ` · 아동 ${reservation.children}명` : ""}`} />
-              <InfoField label="호텔/지점" value={reservation.hotel_branch} />
-              <InfoField label="박수" value={`${reservation.nights}박`} />
-              <InfoField label="조치상태" value={applied ? "조치완료" : "미조치"} />
+              <InfoField label="Check-in" value={reservation.check_in_date} />
+              <InfoField label="Check-out" value={reservation.check_out_date} />
+              <InfoField label="Guests" value={`${reservation.adults} adults${reservation.children ? ` · ${reservation.children} children` : ""}`} />
+              <InfoField label="Hotel/Branch" value={reservation.hotel_branch} />
+              <InfoField label="Nights" value={`${reservation.nights} nights`} />
+              <InfoField label="Action Status" value={applied ? "Action Taken" : "No Action"} />
             </div>
 
             <div className="mt-5 border-t border-slate-100 pt-4">
-              <div className="text-xs font-medium uppercase tracking-wide text-slate-400">예약 주요 특성</div>
+              <div className="text-xs font-medium uppercase tracking-wide text-slate-400">Key Reservation Features</div>
               <div className="mt-2 flex flex-wrap gap-2">
-                <FeatureChip label="리드타임" value={`${reservation.lead_time}일`} />
-                <FeatureChip label="1박 요금(ADR)" value={`${reservation.adr.toLocaleString()}원`} />
-                <FeatureChip label="식사" value={MEAL_LABEL[reservation.meal] ?? reservation.meal} />
-                <FeatureChip label="보증금" value={DEPOSIT_LABEL[reservation.deposit_type] ?? reservation.deposit_type} />
-                <FeatureChip label="세그먼트" value={SEGMENT_LABEL[reservation.market_segment] ?? reservation.market_segment} />
+                <FeatureChip label="Lead Time" value={`${reservation.lead_time} days`} />
+                <FeatureChip label="Nightly Rate (ADR)" value={`₩${reservation.adr.toLocaleString()}`} />
+                <FeatureChip label="Meal Plan" value={MEAL_LABEL[reservation.meal] ?? reservation.meal} />
+                <FeatureChip label="Deposit" value={DEPOSIT_LABEL[reservation.deposit_type] ?? reservation.deposit_type} />
+                <FeatureChip label="Segment" value={SEGMENT_LABEL[reservation.market_segment] ?? reservation.market_segment} />
               </div>
             </div>
           </div>
 
-          {/* AI 전략 제안: 연관 요인 분석 + 추천 마케팅 시나리오 (실제 LLM 호출) */}
+          {/* AI Strategy Suggestions: related-factor analysis + recommended marketing scenarios (real LLM call) */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
             <div className="flex items-center gap-2 text-brand">
               <FaWandMagicSparkles className="h-4 w-4" />
-              <h2 className="font-semibold">AI 전략 제안</h2>
+              <h2 className="font-semibold">AI Strategy Suggestions</h2>
             </div>
 
             <div className="mt-4 flex items-center gap-2 text-slate-900">
               <FaMagnifyingGlassChart className="h-4 w-4 text-slate-400" />
-              <h3 className="text-sm font-semibold">연관 요인 분석</h3>
+              <h3 className="text-sm font-semibold">Related Factor Analysis</h3>
             </div>
-            {insightLoading && <p className="mt-2 text-sm text-slate-400">AI가 분석 중입니다...</p>}
+            {insightLoading && <p className="mt-2 text-sm text-slate-400">AI is analyzing...</p>}
             {insightError && !insightLoading && (
-              <p className="mt-2 text-sm text-red-500">AI 분석을 불러오지 못했습니다.</p>
+              <p className="mt-2 text-sm text-red-500">Failed to load the AI analysis.</p>
             )}
             {insight && !insightLoading && (
               <>
@@ -215,12 +216,12 @@ function ReservationDetail() {
                   ))}
                 </ul>
                 <p className="mt-1.5 text-xs text-slate-400">
-                  ※ 아래는 상관관계일 뿐 확정된 취소 원인이 아닙니다.
+                  * These are correlations only, not confirmed causes of cancellation.
                 </p>
 
                 <div className="mt-5 flex items-center gap-2 text-slate-900">
                   <FaLightbulb className="h-4 w-4 text-slate-400" />
-                  <h3 className="text-sm font-semibold">추천 마케팅 시나리오</h3>
+                  <h3 className="text-sm font-semibold">Recommended Marketing Scenarios</h3>
                 </div>
                 <div className="mt-2 space-y-2">
                   {insight.scenarios.map((scenario, i) => (
@@ -234,24 +235,24 @@ function ReservationDetail() {
                 </div>
 
                 <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-500">
-                  <strong className="text-slate-700">Human-in-the-loop:</strong> 이 제안은 AI(LLM)가
-                  생성했습니다. 최종 발송 전 담당 직원의 검토 및 승인이 필요합니다.
+                  <strong className="text-slate-700">Human-in-the-loop:</strong> This suggestion was
+                  generated by AI (an LLM). Staff review and approval are required before it is sent.
                 </p>
               </>
             )}
           </div>
 
-          {/* 조합 비교 테이블 */}
+          {/* Combination comparison table */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="font-semibold text-slate-900">조합 비교</h2>
-            <p className="mt-0.5 text-xs text-slate-400">최소 개입으로 라벨이 바뀌는 조합을 확인하세요.</p>
+            <h2 className="font-semibold text-slate-900">Combination Comparison</h2>
+            <p className="mt-0.5 text-xs text-slate-400">Find the combination that flips the label with the smallest intervention.</p>
             <ul className="mt-3 divide-y divide-slate-100">
               {combos.map((combo) => (
                 <li key={combo.key} className="flex items-center justify-between py-2.5 text-sm">
                   <span className="text-slate-600">
                     {combo.title}
                     {combo.key !== "none" && combo.key !== "breakfast" && (
-                      <span className="text-slate-400"> (할인 {combo.resolvedDiscount}%)</span>
+                      <span className="text-slate-400"> (Discount {combo.resolvedDiscount}%)</span>
                     )}
                   </span>
                   <PredictionBadge label={combo.label} />
@@ -261,14 +262,14 @@ function ReservationDetail() {
           </div>
         </div>
 
-        {/* 개입 조작 패널 */}
+        {/* Intervention control panel */}
         <div className="space-y-5">
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="font-semibold text-slate-900">개입 조작</h2>
+            <h2 className="font-semibold text-slate-900">Intervention Controls</h2>
 
             <div className="mt-4">
               <div className="flex items-center justify-between text-sm">
-                <label htmlFor="discount" className="font-medium text-slate-700">할인쿠폰 (ADR 할인율)</label>
+                <label htmlFor="discount" className="font-medium text-slate-700">Discount Coupon (% off ADR)</label>
                 <span className="font-semibold text-brand">{discountPercent}%</span>
               </div>
               <input
@@ -284,7 +285,7 @@ function ReservationDetail() {
             </div>
 
             <label className="mt-5 flex items-center justify-between rounded-xl border border-slate-200 p-3">
-              <span className="text-sm font-medium text-slate-700">조식쿠폰 제공</span>
+              <span className="text-sm font-medium text-slate-700">Offer Breakfast Coupon</span>
               <input
                 type="checkbox"
                 checked={breakfastCoupon}
@@ -300,16 +301,16 @@ function ReservationDetail() {
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-60"
             >
               <FaPlay className="h-3.5 w-3.5" />
-              시뮬레이션 실행
+              Run Simulation
             </button>
           </div>
 
           {/* Before / After */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 className="font-semibold text-slate-900">Before → After 비교</h2>
+            <h2 className="font-semibold text-slate-900">Before → After Comparison</h2>
             <div className="mt-4 flex items-center justify-center gap-4">
               <div className="flex-1 text-center">
-                <div className="text-xs text-slate-400">조작 전</div>
+                <div className="text-xs text-slate-400">Before</div>
                 <div className="mt-2">
                   <PredictionBadge label={reservation.risk_label} size="lg" />
                 </div>
@@ -319,13 +320,13 @@ function ReservationDetail() {
               </div>
               <FaArrowLeft className="h-4 w-4 rotate-180 text-slate-300" />
               <div className="flex-1 text-center">
-                <div className="text-xs text-slate-400">조작 후</div>
+                <div className="text-xs text-slate-400">After</div>
                 <div className={`mt-2 rounded-2xl ${labelChanged ? "ring-2 ring-brand ring-offset-2" : ""}`}>
                   {result ? (
                     <PredictionBadge label={result.label} size="lg" />
                   ) : (
                     <span className="inline-flex items-center rounded-2xl bg-slate-100 px-4 py-2.5 text-sm text-slate-400">
-                      실행 대기 중
+                      Waiting to run
                     </span>
                   )}
                 </div>
@@ -338,11 +339,11 @@ function ReservationDetail() {
             <div className="rounded-2xl border border-brand/30 bg-brand/5 p-5">
               <div className="flex items-center gap-2 text-brand">
                 <FaLightbulb className="h-4 w-4" />
-                <h3 className="font-semibold">이 조치를 추천합니다</h3>
+                <h3 className="font-semibold">This action is recommended</h3>
               </div>
               <p className="mt-1.5 text-sm text-slate-600">
-                할인 {discountPercent}%{breakfastCoupon ? " + 조식쿠폰" : ""} 적용 시 예측 라벨이{" "}
-                <b>취소 예상 → 미취소 예상</b>으로 전환됩니다.
+                Applying a {discountPercent}% discount{breakfastCoupon ? " + breakfast coupon" : ""} flips the predicted label from{" "}
+                <b>Predicted Cancellation → Predicted Keep</b>.
               </p>
               <button
                 type="button"
@@ -351,24 +352,24 @@ function ReservationDetail() {
                 className="mt-3 flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
               >
                 <FaTicket className="h-3.5 w-3.5" />
-                {applied ? "적용 완료" : applying ? "발급 중..." : "실제 적용 (쿠폰 발급)"}
+                {applied ? "Applied" : applying ? "Issuing..." : "Apply (Issue Coupon)"}
               </button>
             </div>
           )}
 
-          {/* 비용 메모 */}
+          {/* Cost notes */}
           {cost && (
             <div className="rounded-2xl border border-slate-200 bg-white p-6">
-              <h2 className="font-semibold text-slate-900">비용 메모</h2>
-              <p className="mt-0.5 text-xs text-slate-400">단순 산술 비교 (확률 불필요)</p>
+              <h2 className="font-semibold text-slate-900">Cost Notes</h2>
+              <p className="mt-0.5 text-xs text-slate-400">Simple arithmetic comparison (no probability needed)</p>
               <div className="mt-3 space-y-2 text-sm">
-                <CostRow label="쿠폰 비용" value={cost.couponCost} />
-                <CostRow label="객실 유지 시 매출" value={cost.revenueIfKept} />
+                <CostRow label="Coupon Cost" value={cost.couponCost} />
+                <CostRow label="Revenue if Kept" value={cost.revenueIfKept} />
                 <div className="flex items-center justify-between border-t border-slate-100 pt-2 font-semibold">
-                  <span className="text-slate-700">순 효과</span>
+                  <span className="text-slate-700">Net Effect</span>
                   <span className={cost.net >= 0 ? "text-green-600" : "text-red-600"}>
                     {cost.net >= 0 ? "+" : ""}
-                    {cost.net.toLocaleString()}원
+                    ₩{cost.net.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -402,7 +403,7 @@ function CostRow({ label, value }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-slate-500">{label}</span>
-      <span className="font-medium text-slate-900">{value.toLocaleString()}원</span>
+      <span className="font-medium text-slate-900">₩{value.toLocaleString()}</span>
     </div>
   );
 }

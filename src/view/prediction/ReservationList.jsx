@@ -1,4 +1,4 @@
-// 2. 예약 리스트: 검색/상태 필터/정렬/일괄 시뮬레이션/페이지네이션.
+// 2. Reservation list: search / status filter / sort / bulk simulation / pagination.
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaMagnifyingGlass, FaPlay } from "react-icons/fa6";
@@ -10,10 +10,10 @@ import { simulateProbability } from "src/data/predictionDemoData";
 import LoadingState from "src/components/common/LoadingState";
 
 const STATUS_CHIPS = [
-  { value: "all", label: "전체" },
-  { value: "CANCEL", label: "취소예상" },
-  { value: "KEEP", label: "미취소예상" },
-  { value: "DONE", label: "조치완료" },
+  { value: "all", label: "All" },
+  { value: "CANCEL", label: "Predicted Cancellation" },
+  { value: "KEEP", label: "Predicted Keep" },
+  { value: "DONE", label: "Action Taken" },
 ];
 
 const PAGE_SIZE = 10;
@@ -89,15 +89,15 @@ function ReservationList() {
   const runBulkSimulation = () => {
     if (selected.size === 0) return;
     const targets = filteredReservations.filter((r) => selected.has(r.reservation_id));
-    showToast({ title: "일괄 시뮬레이션 실행 중", message: `${targets.length}건 처리 중...`, tone: "info", duration: 1400 });
+    showToast({ title: "Running bulk simulation", message: `Processing ${targets.length} reservations...`, tone: "info", duration: 1400 });
     window.setTimeout(() => {
       const flipped = targets.filter((r) => {
         const { label } = simulateProbability(r, { discountPercent: 15, breakfastCoupon: true });
         return r.risk_label === "CANCEL" && label === "KEEP";
       }).length;
       showToast({
-        title: "일괄 시뮬레이션 완료",
-        message: `${targets.length}건 중 ${flipped}건이 할인 15% + 조식쿠폰 적용 시 라벨 전환 예상`,
+        title: "Bulk simulation complete",
+        message: `${flipped} of ${targets.length} reservations are predicted to flip label with a 15% discount + breakfast coupon`,
         tone: "success",
         duration: 4000,
       });
@@ -115,7 +115,7 @@ function ReservationList() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="고객명 또는 예약번호 검색"
+              placeholder="Search by customer name or reservation number"
               className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
           </div>
@@ -140,21 +140,21 @@ function ReservationList() {
             onChange={(e) => setSortBy(e.target.value)}
             className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           >
-            <option value="lead_time">체크인 임박순</option>
-            <option value="probability">취소확률 높은순</option>
+            <option value="lead_time">Soonest Check-in</option>
+            <option value="probability">Highest Cancellation Probability</option>
           </select>
         </div>
 
         {selected.size > 0 && (
           <div className="flex items-center justify-between rounded-2xl border border-brand/30 bg-brand/5 px-4 py-2.5">
-            <span className="text-sm font-medium text-slate-700">{selected.size}건 선택됨</span>
+            <span className="text-sm font-medium text-slate-700">{selected.size} selected</span>
             <button
               type="button"
               onClick={runBulkSimulation}
               className="flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-dark"
             >
               <FaPlay className="h-3 w-3" />
-              선택 항목 일괄 시뮬레이션
+              Run Bulk Simulation on Selected
             </button>
           </div>
         )}
@@ -173,14 +173,14 @@ function ReservationList() {
                     className="h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
                   />
                 </th>
-                <th className="px-3 py-3 font-medium">예약번호</th>
-                <th className="px-3 py-3 font-medium">고객명</th>
-                <th className="px-3 py-3 font-medium">체크인일</th>
-                <th className="px-3 py-3 font-medium">리드타임</th>
+                <th className="px-3 py-3 font-medium">Reservation No.</th>
+                <th className="px-3 py-3 font-medium">Customer</th>
+                <th className="px-3 py-3 font-medium">Check-in Date</th>
+                <th className="px-3 py-3 font-medium">Lead Time</th>
                 <th className="px-3 py-3 font-medium">ADR</th>
-                <th className="px-3 py-3 font-medium">조식여부</th>
-                <th className="px-3 py-3 font-medium">예측</th>
-                <th className="px-3 py-3 font-medium">조치상태</th>
+                <th className="px-3 py-3 font-medium">Breakfast</th>
+                <th className="px-3 py-3 font-medium">Prediction</th>
+                <th className="px-3 py-3 font-medium">Action Status</th>
                 <th className="px-3 py-3 font-medium"></th>
               </tr>
             </thead>
@@ -199,13 +199,13 @@ function ReservationList() {
                   <td className="px-3 py-3 text-slate-600">{r.customer_name}</td>
                   <td className="px-3 py-3 text-slate-600">{r.check_in_date}</td>
                   <td className="px-3 py-3 text-slate-600">D-{r.lead_time}</td>
-                  <td className="px-3 py-3 text-slate-600">{r.adr.toLocaleString()}원</td>
-                  <td className="px-3 py-3 text-slate-600">{r.meal === "BB" ? "포함" : "미포함"}</td>
+                  <td className="px-3 py-3 text-slate-600">₩{r.adr.toLocaleString()}</td>
+                  <td className="px-3 py-3 text-slate-600">{r.meal === "BB" ? "Included" : "Not Included"}</td>
                   <td className="px-3 py-3">
                     <PredictionBadge label={r.risk_label} />
                   </td>
                   <td className="px-3 py-3 text-slate-500">
-                    {r.action_status === "DONE" ? "조치완료" : "미조치"}
+                    {r.action_status === "DONE" ? "Action Taken" : "No Action"}
                   </td>
                   <td className="px-3 py-3">
                     <button
@@ -213,7 +213,7 @@ function ReservationList() {
                       onClick={() => navigate(`/prediction/reservations/${r.reservation_code}`)}
                       className="rounded-full border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-brand hover:text-brand"
                     >
-                      상세보기
+                      View Details
                     </button>
                   </td>
                 </tr>
@@ -224,9 +224,9 @@ function ReservationList() {
                     {loading ? (
                       <LoadingState inline />
                     ) : error ? (
-                      "예약 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요."
+                      "Failed to load reservation data. Please check that the backend server is running."
                     ) : (
-                      "조건에 맞는 예약이 없습니다."
+                      "No reservations match the filters."
                     )}
                   </td>
                 </tr>
@@ -237,8 +237,8 @@ function ReservationList() {
 
         <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
           <span>
-            총 {rows.length}건 중 {pageRows.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–
-            {(page - 1) * PAGE_SIZE + pageRows.length}건
+            {pageRows.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–
+            {(page - 1) * PAGE_SIZE + pageRows.length} of {rows.length}
           </span>
           <div className="flex items-center gap-1">
             <button
@@ -247,7 +247,7 @@ function ReservationList() {
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               className="rounded-lg px-2.5 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-30"
             >
-              이전
+              Previous
             </button>
             <span className="px-2 text-slate-700">{page} / {totalPages}</span>
             <button
@@ -256,7 +256,7 @@ function ReservationList() {
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               className="rounded-lg px-2.5 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-30"
             >
-              다음
+              Next
             </button>
           </div>
         </div>

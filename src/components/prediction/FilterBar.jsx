@@ -1,4 +1,4 @@
-// 전역 필터바: 기간 / 호텔·지점 / 세그먼트. 대시보드·예약 리스트 화면에서 공용으로 사용.
+// Global filter bar: period / hotel branch / segment. Shared by the dashboard and reservation list screens.
 import { usePredictionFilters, PERIOD_OPTIONS } from "src/view/prediction/PredictionFilterContext";
 import { SEGMENT_LABEL } from "src/data/labels";
 
@@ -25,7 +25,7 @@ function FilterBar({ sticky = false }) {
         value={hotelBranch}
         onChange={setHotelBranch}
         options={[
-          { value: "all", label: "전체 호텔/지점" },
+          { value: "all", label: "All Branches" },
           ...hotelBranchOptions.map((v) => ({ value: v, label: v })),
         ]}
       />
@@ -33,7 +33,7 @@ function FilterBar({ sticky = false }) {
         value={segment}
         onChange={setSegment}
         options={[
-          { value: "all", label: "전체 세그먼트" },
+          { value: "all", label: "All Segments" },
           ...segmentOptions.map((v) => ({ value: v, label: SEGMENT_LABEL[v] ?? v })),
         ]}
       />

@@ -1,4 +1,4 @@
-// overbooking API 호출 모음
+// Collection of overbooking API calls
 import instance from "./axios";
 
 export const getOverbookingSummary = (dateFrom, dateTo) =>

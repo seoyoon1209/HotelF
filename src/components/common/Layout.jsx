@@ -1,4 +1,4 @@
-// 실제 서비스 페이지 전용 레이아웃
+// Layout used for the actual service pages
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Sidebar from "./Sidebar";

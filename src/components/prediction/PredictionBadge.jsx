@@ -1,15 +1,15 @@
-// 취소예상/미취소예상 이진 예측 배지. 기획서 공통 요소: critical=취소예상 빨강, good=미취소예상 초록.
+// Binary predicted-cancellation/predicted-keep badge. Shared spec element: critical = predicted cancellation (red), good = predicted keep (green).
 import { FaCircleExclamation, FaCircleCheck } from "react-icons/fa6";
 
 const STYLE = {
   CANCEL: {
-    label: "취소 예상",
+    label: "Predicted Cancellation",
     className: "bg-red-50 text-red-700 ring-red-600/20",
     dot: "bg-red-500",
     icon: FaCircleExclamation,
   },
   KEEP: {
-    label: "미취소 예상",
+    label: "Predicted Keep",
     className: "bg-green-50 text-green-700 ring-green-600/20",
     dot: "bg-green-500",
     icon: FaCircleCheck,
@@ -18,7 +18,7 @@ const STYLE = {
 
 function PredictionBadge({ label, size = "md" }) {
   const style = STYLE[label] ?? {
-    label: "예측 없음",
+    label: "No Prediction",
     className: "bg-gray-50 text-gray-500 ring-gray-500/20",
     dot: "bg-gray-400",
     icon: FaCircleExclamation,

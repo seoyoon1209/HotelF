@@ -1,7 +1,7 @@
-// 세그먼트별(deposit_type · market_segment) 취소예상 비율 상위 랭킹 리스트.
+// Ranked list of top predicted-cancellation rates by segment (deposit_type / market_segment).
 function SegmentRankList({ rows }) {
   if (rows.length === 0) {
-    return <p className="text-sm text-slate-400">표시할 세그먼트 데이터가 없습니다.</p>;
+    return <p className="text-sm text-slate-400">No segment data to display.</p>;
   }
 
   const max = Math.max(...rows.map((r) => r.ratio));

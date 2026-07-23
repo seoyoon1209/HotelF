@@ -1,4 +1,4 @@
-// 취소예상 vs 미취소예상 비율을 보여주는 단순 SVG 도넛 차트.
+// Simple SVG donut chart showing the ratio of predicted cancellations vs. predicted non-cancellations.
 function DonutChart({ cancelCount, keepCount, size = 140, stroke = 18 }) {
   const total = cancelCount + keepCount;
   const radius = (size - stroke) / 2;
@@ -7,7 +7,7 @@ function DonutChart({ cancelCount, keepCount, size = 140, stroke = 18 }) {
   const cancelLength = circumference * cancelRatio;
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="취소예상 비율 도넛 차트">
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label="Donut chart of predicted cancellation rate">
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -45,7 +45,7 @@ function DonutChart({ cancelCount, keepCount, size = 140, stroke = 18 }) {
         className="fill-slate-400"
         style={{ fontSize: size * 0.08 }}
       >
-        취소 예상
+        Predicted cancellation
       </text>
     </svg>
   );

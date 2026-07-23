@@ -1,4 +1,4 @@
-// 공용 axios 인스턴스
+// Shared axios instance
 import axios from "axios";
 
 const baseURL =

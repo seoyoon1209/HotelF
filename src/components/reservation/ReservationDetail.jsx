@@ -1,4 +1,4 @@
-// 예약 상세 페이지: 예약 정보 + 취소 예측 이력
+// Reservation detail page: reservation info + cancellation prediction history
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FaArrowLeft, FaClock, FaLightbulb } from "react-icons/fa6";
@@ -9,9 +9,9 @@ import StatusBadge from "src/components/common/StatusBadge";
 import LoadingState from "src/components/common/LoadingState";
 
 const SUGGESTED_ACTIONS = [
-  { key: "recheck", label: "재확인 연락" },
-  { key: "reschedule", label: "일정 변경 제안" },
-  { key: "upgrade", label: "업그레이드 제안" },
+  { key: "recheck", label: "Follow-up call to confirm" },
+  { key: "reschedule", label: "Suggest a date change" },
+  { key: "upgrade", label: "Offer an upgrade" },
 ];
 
 function ReservationDetail() {
@@ -35,10 +35,10 @@ function ReservationDetail() {
   if (notFound) {
     return (
       <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-slate-500">
-        예약을 찾을 수 없습니다.
+        Reservation not found.
         <div className="mt-3">
           <Link to="/reservations" className="text-sm font-medium text-brand hover:underline">
-            예약 목록으로 돌아가기
+            Back to Reservation List
           </Link>
         </div>
       </div>
@@ -51,9 +51,9 @@ function ReservationDetail() {
 
   const isHighRisk = ["HIGH", "CRITICAL"].includes(reservation.risk_level);
   const guestSummary = [
-    `성인 ${reservation.adult_count}명`,
-    reservation.child_count ? `아동 ${reservation.child_count}명` : null,
-    reservation.baby_count ? `유아 ${reservation.baby_count}명` : null,
+    `${reservation.adult_count} adults`,
+    reservation.child_count ? `${reservation.child_count} children` : null,
+    reservation.baby_count ? `${reservation.baby_count} infants` : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -65,7 +65,7 @@ function ReservationDetail() {
         className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800"
       >
         <FaArrowLeft className="h-3 w-3" />
-        예약 목록
+        Reservation List
       </Link>
 
       <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-6">
@@ -73,7 +73,7 @@ function ReservationDetail() {
           <div>
             <div className="text-xs text-slate-400">{reservation.reservation_code}</div>
             <h1 className="mt-0.5 text-xl font-bold text-slate-900">
-              {reservation.customer_name ?? "고객정보 없음"}
+              {reservation.customer_name ?? "No customer info"}
             </h1>
             <div className="mt-1 text-sm text-slate-500">{reservation.hotel_name}</div>
           </div>
@@ -84,11 +84,11 @@ function ReservationDetail() {
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-4 border-t border-slate-100 pt-5 text-sm sm:grid-cols-4">
-          <Field label="체크인" value={reservation.check_in_date} />
-          <Field label="체크아웃" value={reservation.check_out_date} />
-          <Field label="인원" value={guestSummary || "-"} />
+          <Field label="Check-in" value={reservation.check_in_date} />
+          <Field label="Check-out" value={reservation.check_out_date} />
+          <Field label="Guests" value={guestSummary || "-"} />
           <Field
-            label="취소 확률"
+            label="Cancellation Probability"
             value={
               reservation.cancellation_probability != null
                 ? `${(Number(reservation.cancellation_probability) * 100).toFixed(1)}%`
@@ -97,21 +97,21 @@ function ReservationDetail() {
           />
           <Field
             label="ADR"
-            value={reservation.adr != null ? `${Number(reservation.adr).toLocaleString()}원` : "-"}
+            value={reservation.adr != null ? `₩${Number(reservation.adr).toLocaleString()}` : "-"}
           />
           <Field
-            label="총 결제금액"
-            value={reservation.total_price != null ? `${Number(reservation.total_price).toLocaleString()}원` : "-"}
+            label="Total Amount"
+            value={reservation.total_price != null ? `₩${Number(reservation.total_price).toLocaleString()}` : "-"}
           />
-          <Field label="식사" value={reservation.meal_name ?? "-"} />
-          <Field label="보증금 유형" value={reservation.deposit_name ?? "-"} />
-          <Field label="시장 세그먼트" value={reservation.segment_name ?? "-"} />
-          <Field label="유입 채널" value={reservation.channel_name ?? "-"} />
+          <Field label="Meal Plan" value={reservation.meal_name ?? "-"} />
+          <Field label="Deposit Type" value={reservation.deposit_name ?? "-"} />
+          <Field label="Market Segment" value={reservation.segment_name ?? "-"} />
+          <Field label="Channel" value={reservation.channel_name ?? "-"} />
         </div>
 
         {modelInfo?.accuracy != null && (
           <p className="mt-4 text-xs text-slate-400">
-            취소 위험도는 참고용 예측치입니다 (모델 정확도 약 {Math.round(modelInfo.accuracy * 100)}% 수준).
+            Cancellation risk is a reference prediction only (model accuracy roughly {Math.round(modelInfo.accuracy * 100)}%).
           </p>
         )}
       </div>
@@ -120,10 +120,10 @@ function ReservationDetail() {
         <div className="mt-5 rounded-2xl border border-orange-200 bg-orange-50 p-6">
           <div className="flex items-center gap-2 text-orange-900">
             <FaLightbulb className="h-4 w-4" />
-            <h2 className="font-semibold">선제적 고객 관리 제안</h2>
+            <h2 className="font-semibold">Proactive Guest Care Suggestions</h2>
           </div>
           <p className="mt-1 text-sm text-orange-800">
-            취소 위험도가 높은 예약입니다. 아래 조치 중 진행한 항목을 체크하세요.
+            This reservation has a high cancellation risk. Check off any actions you've taken below.
           </p>
           <ul className="mt-3 space-y-2">
             {SUGGESTED_ACTIONS.map((action) => (
@@ -152,7 +152,7 @@ function ReservationDetail() {
       <div className="mt-8">
         <div className="flex items-center gap-2 text-slate-900">
           <FaClock className="h-4 w-4 text-slate-400" />
-          <h2 className="font-semibold">취소 예측 이력</h2>
+          <h2 className="font-semibold">Cancellation Prediction History</h2>
         </div>
         <ul className="mt-3 space-y-2 text-sm">
           {predictions.map((prediction) => (
@@ -173,7 +173,7 @@ function ReservationDetail() {
           ))}
           {predictions.length === 0 && (
             <li className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-              예측 이력이 없습니다.
+              No prediction history.
             </li>
           )}
         </ul>

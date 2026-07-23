@@ -1,4 +1,4 @@
-// prediction API 호출 모음
+// Collection of prediction API calls
 import instance from "./axios";
 
 export const getPredictionsByReservation = (reservationId) =>

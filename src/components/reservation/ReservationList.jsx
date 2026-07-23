@@ -1,4 +1,4 @@
-// 예약 목록 페이지.
+// Reservation list page.
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaMagnifyingGlass, FaCircleExclamation } from "react-icons/fa6";
@@ -10,11 +10,11 @@ import LoadingState from "src/components/common/LoadingState";
 const PAGE_SIZE = 10;
 
 const STATUS_CHIPS = [
-  { value: "all", label: "전체" },
-  { value: "CONFIRMED", label: "확정" },
-  { value: "CHECKED_IN", label: "체크인" },
-  { value: "COMPLETED", label: "완료" },
-  { value: "CANCELLED", label: "취소" },
+  { value: "all", label: "All" },
+  { value: "CONFIRMED", label: "Confirmed" },
+  { value: "CHECKED_IN", label: "Checked In" },
+  { value: "COMPLETED", label: "Completed" },
+  { value: "CANCELLED", label: "Cancelled" },
 ];
 
 function ReservationList() {
@@ -60,10 +60,10 @@ function ReservationList() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">예약 목록</h1>
-          <p className="mt-0.5 text-sm text-slate-500">전체 예약과 취소 위험도를 한눈에 확인하세요.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">Reservation List</h1>
+          <p className="mt-0.5 text-sm text-slate-500">See all reservations and their cancellation risk at a glance.</p>
         </div>
-        <span className="text-sm text-slate-400">총 {reservations.length}건</span>
+        <span className="text-sm text-slate-400">{reservations.length} total</span>
       </div>
 
       <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
@@ -72,7 +72,7 @@ function ReservationList() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="예약번호, 고객명, 호텔명 검색"
+            placeholder="Search by reservation number, customer name, or hotel"
             className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
           />
         </div>
@@ -94,7 +94,7 @@ function ReservationList() {
         </div>
       </div>
 
-      {/* 모바일: 카드 목록 */}
+      {/* Mobile: card list */}
       <div className="mt-4 space-y-2 sm:hidden">
         {pageRows.map((reservation) => (
           <Link
@@ -107,7 +107,7 @@ function ReservationList() {
               <RiskBadge riskLevel={reservation.risk_level} />
             </div>
             <div className="mt-1 text-sm text-slate-500">
-              {reservation.customer_name ?? "고객정보 없음"} · {reservation.hotel_name}
+              {reservation.customer_name ?? "No customer info"} · {reservation.hotel_name}
             </div>
             <div className="mt-2 flex items-center justify-between text-xs text-slate-400">
               <span>
@@ -118,23 +118,23 @@ function ReservationList() {
           </Link>
         ))}
         {!loading && !error && pageRows.length === 0 && (
-          <EmptyState label="조건에 맞는 예약이 없습니다." />
+          <EmptyState label="No reservations match the filters." />
         )}
       </div>
 
-      {/* 데스크톱: 테이블 */}
+      {/* Desktop: table */}
       <div className="mt-4 hidden overflow-hidden rounded-2xl border border-slate-200 bg-white sm:block">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 text-slate-500">
-                <th className="px-4 py-3 font-medium">예약번호</th>
-                <th className="px-4 py-3 font-medium">고객명</th>
-                <th className="px-4 py-3 font-medium">호텔/지점</th>
-                <th className="px-4 py-3 font-medium">체크인 → 체크아웃</th>
+                <th className="px-4 py-3 font-medium">Reservation No.</th>
+                <th className="px-4 py-3 font-medium">Customer</th>
+                <th className="px-4 py-3 font-medium">Hotel/Branch</th>
+                <th className="px-4 py-3 font-medium">Check-in → Check-out</th>
                 <th className="px-4 py-3 font-medium">ADR</th>
-                <th className="px-4 py-3 font-medium">상태</th>
-                <th className="px-4 py-3 font-medium">취소 위험도</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">Cancellation Risk</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -154,7 +154,7 @@ function ReservationList() {
                     {reservation.check_in_date} → {reservation.check_out_date}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
-                    {reservation.adr != null ? `${Number(reservation.adr).toLocaleString()}원` : "-"}
+                    {reservation.adr != null ? `₩${Number(reservation.adr).toLocaleString()}` : "-"}
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={reservation.reservation_status} />
@@ -172,7 +172,7 @@ function ReservationList() {
                     ) : error ? (
                       <ErrorState />
                     ) : (
-                      <EmptyState label="조건에 맞는 예약이 없습니다." />
+                      <EmptyState label="No reservations match the filters." />
                     )}
                   </td>
                 </tr>
@@ -184,7 +184,7 @@ function ReservationList() {
         {rows.length > 0 && (
           <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 text-sm text-slate-500">
             <span>
-              {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + pageRows.length}건 / 총 {rows.length}건
+              {(page - 1) * PAGE_SIZE + 1}–{(page - 1) * PAGE_SIZE + pageRows.length} of {rows.length}
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -193,7 +193,7 @@ function ReservationList() {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 className="rounded-lg px-2.5 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-30"
               >
-                이전
+                Previous
               </button>
               <span className="px-2 text-slate-700">{page} / {totalPages}</span>
               <button
@@ -202,7 +202,7 @@ function ReservationList() {
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 className="rounded-lg px-2.5 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-30"
               >
-                다음
+                Next
               </button>
             </div>
           </div>
@@ -227,7 +227,7 @@ function ErrorState() {
   return (
     <div className="flex flex-col items-center gap-2 text-center text-red-500">
       <FaCircleExclamation className="h-5 w-5" />
-      <span>예약 데이터를 불러오지 못했습니다. 백엔드 서버가 켜져 있는지 확인해주세요.</span>
+      <span>Failed to load reservation data. Please check that the backend server is running.</span>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-// 전역 토스트 알림. "시뮬레이션 실행 중", "쿠폰 발급 완료" 등 공통 요소로 쓰인다.
+// Global toast notifications. Used as a shared element for things like "Running simulation" or "Coupon issued".
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { FaCircleCheck, FaSpinner, FaCircleInfo } from "react-icons/fa6";
 
