@@ -1,338 +1,343 @@
-# Team E 제품 요구사항 문서(PRD)
+# Team E Product Requirement Document (PRD)
 
-| 항목 | 내용 |
+| Item | Content |
 |---|---|
-| 제품명 | Hoteling |
-| 제품 유형 | 호텔 예약 취소 예측 및 운영 의사결정 지원 도구 |
+| Product Name | Hoteling |
+| Product Type | Hotel Booking Cancellation Prediction & Operational Decision Support Tool |
 
 ---
 
-## 1. 제품 개요
+## 1. Product Overview
 
-### 1.1 제품 한 줄 소개
-Team E는 호텔 예약 정보를 이용해 예약별 취소 가능성을 예측하고, 호텔 직원이 우선 확인할 예약을 정하도록 돕는 의사결정 지원 도구다.
+### 1.1 One-Line Summary
+Team E provides a decision support tool that predicts booking-specific cancellation probabilities using hotel reservation data, helping hotel staff prioritize which bookings to review first.
 
-### 1.2 개발 배경
-호텔 예약 취소는 객실 재고 운영, 고객 응대, 재판매 준비 및 예상 매출에 불확실성을 만든다. 예약이 많을수록 직원이 모든 예약을 같은 수준으로 검토하기 어렵고, 실제 취소가 발생한 뒤에는 대응 시간이 부족할 수 있다. Hoteling은 예약 시점에 확보할 수 있는 15개 핵심 정보를 활용해 취소 가능성을 미리 계산하고 직원의 검토 우선순위를 정하는 것을 목표로 한다.
+### 1.2 Development Background
+Hotel booking cancellations create uncertainty in room inventory management, customer service, resale preparation, and expected revenue. As booking volumes increase, it becomes difficult for staff to review every reservation with equal attention, and reacting only after a cancellation occurs leaves insufficient lead time. Hoteling aims to compute cancellation probabilities in advance using 15 core features available at the time of booking, establishing clear review priorities for hotel staff.
 
-### 1.3 제품 비전
-예약 취소 예측을 직원의 업무 흐름에 연결하여, 데이터에 기반한 일관된 검토가 가능하도록 한다. 예측 결과는 자동 의사결정에 사용하지 않으며 최종 판단과 조치는 직원이 담당한다.
-
----
-
-## 2. 문제 정의
-
-### 2.1 현재 문제
-- 호텔 직원은 많은 예약 중 취소 가능성이 높은 예약을 사전에 일관된 기준으로 식별하기 어렵다.
-- 취소를 늦게 인지하면 고객 확인과 객실 재판매 준비에 사용할 수 있는 시간이 줄어든다.
-- 모든 예약을 동일하게 검토하면 담당자의 시간과 연락 자원이 비효율적으로 사용될 수 있다.
-
-### 2.2 문제 발생 원인
-- 예약 취소는 리드타임, 보증금 유형, 시장 세그먼트, 평균 일일 요금, 과거 취소 이력, 숙박 박수, 고객 국가 등 여러 변수가 함께 영향을 미친다.
-- 15개 이상의 예약 정보가 여러 필드에 나뉘어 있어 사람이 변수 조합을 동시에 비교하기 어렵다.
-- 단일 조건이나 고정 규칙만으로 다양한 예약 패턴을 반영하기 어렵다.
-
-### 2.3 핵심 문제
-예약별 취소 가능성을 데이터 기반 확률로 제공하여, 직원이 제한된 시간 안에 우선 검토할 예약을 식별하고 후속 조치를 더 일찍 준비할 수 있도록 해야 한다.
+### 1.3 Product Vision
+To integrate booking cancellation predictions directly into staff workflows, enabling consistent, data-driven reviews. Predictions are not used for automated decision-making; final judgments and operational actions remain fully with the staff.
 
 ---
 
-## 3. 목표 및 비목표
+## 2. Problem Statement
 
-### 3.1 제품 목표
-- 15개 예약 특성을 기반으로 예약별 취소 확률과 예측 결과를 제공한다.
-- 취소 확률이 높은 예약을 우선순위에 따라 조회할 수 있게 한다.
-- 예측 결과와 15개 입력 특성 정보를 한 화면에서 확인할 수 있게 한다.
-- 예측 결과에 대한 최종 판단과 조치 권한을 직원에게 유지한다.
+### 2.1 Current Problems
+- Hotel staff struggle to identify high-risk cancellations beforehand using a consistent standard among numerous bookings.
+- Late awareness of cancellations reduces the lead time required for guest verification and room resale preparation.
+- Reviewing all bookings equally results in inefficient allocation of staff time and outreach resources.
 
-### 3.2 사용자 목표
-- 취소 가능성이 높은 예약을 먼저 확인한다.
-- 고객 연락이나 객실 재판매 준비를 더 일찍 시작한다.
-- 취소 확률과 전체 15개 예약 특성을 함께 확인한 뒤 조치를 결정한다.
-- 예측 결과와 직원 조치 이력을 추적한다.
+### 2.2 Root Causes
+- Booking cancellations are influenced by a complex combination of variables, including lead time, deposit type, market segment, average daily rate, past cancellation history, stay duration, and guest country of origin.
+- Reservation details are scattered across multiple fields, making it difficult for humans to compare variable combinations simultaneously.
+- Fixed rules or single-condition heuristics fail to capture diverse booking patterns effectively.
 
-### 3.3 기술 목표
-- 15개 특성 기반 후보 모델(XGBoost, Random Forest, Logistic Regression 등)을 시계열 교차검증을 통해 학습 및 관리한다.
-- 학습과 추론에서 동일한 15개 특성 정의와 전처리 규칙을 사용한다.
-- F1-Score(주지표)뿐만 아니라 ROC-AUC, Accuracy, Recall을 목표 지표로 관리한다.
-- 입력 데이터, 전처리 및 모델 버전을 추적할 수 있게 한다.
-
-### 3.4 Out of Focus
-- 예측 결과만으로 예약을 자동 취소하지 않는다.
-- 객실 가격이나 환불 정책을 자동 변경하지 않는다.
-- 고객에게 자동으로 연락하지 않는다.
-- 고객에게 불이익을 주는 자동 의사결정에 사용하지 않는다.
-- 현재 범위에서 매출, 객실 점유율 또는 취소율 개선을 보장하지 않는다.
+### 2.3 Core Problem
+The system must provide data-driven cancellation probabilities so staff can identify high-priority bookings within limited working hours and prepare follow-up actions earlier.
 
 ---
 
-## 4. 목표 사용자
+## 3. Goals & Non-Goals
 
-### 4.1 주요 사용자
-- 호텔 운영 담당자
-- 호텔 수익 관리 담당자
-- 예약 및 고객 관리 담당자
+### 3.1 Product Goals
+- Provide booking-specific cancellation probabilities and predictions based on 15 reservation features.
+- Enable staff to query and view bookings sorted by cancellation risk.
+- Display prediction results alongside the 15 input features on a single screen.
+- Retain final judgment and operational authority exclusively with human staff.
 
-### 4.2 사용자 특성
-- 여러 예약과 객실 재고를 동시에 관리한다.
-- 모델 지표 자체보다 어떤 예약을 먼저 확인해야 하는지에 더 관심이 있다.
-- 불필요한 고객 연락과 취소 가능성 누락을 함께 고려해야 한다.
-- 예측 결과를 최종 결정이 아닌 참고 정보로 사용할 필요가 있다.
+### 3.2 User Goals
+- Identify high-risk cancellation bookings first.
+- Initiate customer verification or room resale preparation earlier.
+- Decide on appropriate actions after reviewing cancellation probabilities in context with the 15 features.
+- Track prediction results and staff action histories.
 
-### 4.3 사용자 요구사항
-- 예약별 취소 확률과 예측 결과를 빠르게 확인할 수 있어야 한다.
-- 취소 확률을 기준으로 예약을 정렬하고 필터링할 수 있어야 한다.
-- 예측에 사용된 15개 예약 특성 정보를 결과와 함께 확인할 수 있어야 한다.
-- 직원이 예측 결과를 검토하고 조치 여부를 직접 결정할 수 있어야 한다.
+### 3.3 Technical Goals
+- Train and manage 15-feature candidate models (XGBoost, Random Forest, Logistic Regression, etc.) using time-series cross-validation.
+- Enforce identical 15-feature definitions and preprocessing rules across training and inference.
+- Monitor F1-Score as the primary metric, alongside ROC-AUC, Accuracy, and Recall as target performance metrics.
+- Maintain traceability for input data, preprocessing pipelines, and model versions.
+
+### 3.4 Out of Focus (Non-Goals)
+- No automated cancellation of bookings based solely on prediction scores.
+- No automated adjustments to room rates or refund policies.
+- No automated outreach or messaging to guests.
+- No automated decisions that could disadvantage guests.
+- No guaranteed improvements in overall revenue, occupancy, or cancellation rates within the current scope.
 
 ---
 
-## 5. 사용자 시나리오
+## 4. Target Users
 
-### 5.1 기본 사용자 흐름
-1. 예약 데이터가 업로드된다.
-2. 시스템이 AI 모델에 필요한 15개 입력 특성의 존재 여부와 데이터 형식을 검사한다.
-3. 시스템이 유효한 데이터를 전처리하고 15개 특성 기반 AI 모델에 전달한다.
-4. 모델이 예약별 취소 확률과 예측 클래스를 반환한다.
-5. 시스템이 예약을 취소 확률이 높은 순서로 정렬한다.
-6. 직원이 예약 상세 정보와 15개 입력 특성을 확인한다.
-7. 직원이 고객 확인이나 객실 재판매 준비 여부를 직접 결정한다.
-8. 시스템이 예측 결과, 모델 버전 및 직원 조치를 저장한다.
+### 4.1 Primary Users
+- Hotel Operations Staff
+- Revenue Managers
+- Reservation & Guest Management Staff
+
+### 4.2 User Characteristics
+- Simultaneously manage multiple reservations and room inventories.
+- More concerned with identifying which bookings require immediate review than with raw model metrics.
+- Need to balance avoiding unnecessary guest contact with preventing undetected cancellations.
+- Require predictions to serve as reference information rather than final automated decisions.
+
+### 4.3 User Requirements
+- Fast visibility into booking-specific cancellation probabilities and predicted classes.
+- Ability to sort and filter reservations based on cancellation risk.
+- Capability to view the 15 reservation input features alongside prediction outputs.
+- Ability for staff to review prediction details and independently decide on follow-up actions.
+
+---
+
+## 5. User Scenarios
+
+### 5.1 Basic User Workflow
+1. Reservation data is uploaded.
+2. The system checks the existence and data types of the 15 required input features.
+3. The system preprocesses valid data and passes it to the 15-feature AI model.
+4. The model returns booking-specific cancellation probabilities and predicted classes.
+5. The system sorts reservations in descending order of cancellation probability.
+6. Staff review booking details and the 15 input features.
+7. Staff independently decide whether to proceed with guest outreach or room resale preparation.
+8. The system logs prediction outputs, model versions, and staff actions.
 
 ### 5.2 User Stories
-- 호텔 운영 담당자로서 취소 확률이 높은 예약을 먼저 확인하여 제한된 근무 시간을 중요한 예약에 집중하고 싶다.
-- 수익 관리 담당자로서 기간별 예상 취소 예약 규모를 확인하여 객실 재판매 준비 시점을 판단하고 싶다.
-- 예약 담당자로서 취소 확률과 15개 예약 정보를 함께 확인한 뒤 고객에게 연락할 필요가 있는지 직접 결정하고 싶다.
-- 관리자로서 어떤 모델 버전이 예측에 사용되었는지 확인하고 싶다.
+- As a Hotel Operations Staff member, I want to review high-risk bookings first so I can focus my limited working hours on critical reservations.
+- As a Revenue Manager, I want to assess expected cancellation volumes over specific timeframes to determine optimal room resale timing.
+- As a Reservation Agent, I want to check cancellation probabilities alongside booking details to decide whether guest verification is necessary.
+- As an Administrator, I want to verify which model version was used for specific predictions.
 
-### 5.3 입력부터 결과 확인까지의 흐름
-`예약 데이터 → 15개 특성 검증 → 전처리 → 15개 특성 AI 모델 추론 → 취소 확률 및 예측 클래스 생성 → 우선순위 목록 표시 → 직원 검토 및 조치 기록`
-
----
-
-## 6. 기능 요구사항
-
-### FR-1. 예약 취소 예측
-- **설명**: 15개 입력 특성을 사용하는 AI 모델로 각 예약의 취소 가능성을 계산한다.
-- **입력**: 검증과 전처리를 마친 15개 입력 특성
-- **처리**: AI 모델을 통한 이진 분류 추론
-- **출력**: 예약별 취소 확률, 예측 클래스, 모델 버전
-
-### FR-2. 우선 검토 예약 목록
-- **설명**: 예약을 취소 확률이 높은 순서로 정렬하고 조건별로 필터링한다.
-- **입력**: 예약 정보와 취소 확률
-- **처리**: 취소 확률, 도착 월, 시장 세그먼트 및 고객 유형 기준 정렬·필터링
-- **출력**: 직원용 우선 검토 예약 목록
-
-### FR-3. 예약 상세 조회
-- **설명**: 선택한 예약의 예측 결과와 모델 입력에 사용된 15개 특성값을 함께 표시한다.
-- **입력**: 예약 식별자, 예측 결과, 15개 입력 특성
-- **처리**: 예약 데이터와 예측 결과 조회
-- **출력**: 예약 상세 정보, 취소 확률, 예측 클래스, 15개 입력 특성 요약
-
-### FR-4. 예측 이력 관리
-- **설명**: 예측 결과와 직원 조치를 저장하고 조회한다.
-- **입력**: 예약 식별자, 예측 결과, 예측 시각, 모델 버전, 직원 조치
-- **처리**: 권한 확인 후 이력 저장 및 조회
-- **출력**: 예약별 예측 및 조치 이력
-
-### FR-5. 결과 내보내기
-- **설명**: 예측 결과를 업무용 파일로 내보낸다.
-- **입력**: 사용자가 선택한 예약과 조회 조건
-- **처리**: 권한 확인, 직접 식별정보 최소화, 파일 생성
-- **출력**: CSV 형식의 예측 결과
+### 5.3 End-to-End Processing Flow
+`Reservation Data → 15-Feature Validation → Preprocessing → 15-Feature AI Model Inference → Probability & Class Generation → Priority List Display → Staff Review & Action Logging`
 
 ---
 
-## 7. AI 및 데이터 요구사항
+## 6. Functional Requirements
 
-### 7.1 데이터 범위
-- Hotel Booking Demand 공개 데이터셋의 City Hotel 예약 기록을 사용한다.
-- 정제 전 City Hotel 데이터는 79,330개 레코드다.
-- 정제 절차를 거친 모델링 데이터는 78,669개 레코드다.
-- 데이터 기간은 2015년 7월부터 2017년 8월까지다.
+### FR-1. Booking Cancellation Prediction
+- **Description**: Computes the cancellation likelihood for each reservation using an AI model trained on 15 input features.
+- **Input**: Validated and preprocessed 15 input features.
+- **Processing**: Binary classification inference via the AI model.
+- **Output**: Cancellation probability per booking, predicted class, and model version.
 
-### 7.2 목표 변수
-| 항목 | 값 |
+### FR-2. Priority Review List
+- **Description**: Sorts bookings in descending order of cancellation probability and filters them by specific operational criteria.
+- **Input**: Reservation details and cancellation probabilities.
+- **Processing**: Sorting and filtering by cancellation risk, arrival month, market segment, and customer type.
+- **Output**: Priority review list for staff use.
+
+### FR-3. Booking Detail View
+- **Description**: Displays prediction outputs and the 15 feature input values for a selected booking on a single screen.
+- **Input**: Booking ID, prediction outputs, and 15 input features.
+- **Processing**: Retrieval of reservation data and prediction results.
+- **Output**: Reservation details, cancellation probability, predicted class, and 15 input feature summary.
+
+### FR-4. Prediction History Management
+- **Description**: Stores and retrieves prediction results and staff actions.
+- **Input**: Booking ID, prediction outputs, timestamp, model version, and staff actions.
+- **Processing**: Access authorization check followed by logging and querying history records.
+- **Output**: Historical prediction and action records per reservation.
+
+### FR-5. Export Results
+- **Description**: Exports prediction outputs into operational files for business workflows.
+- **Input**: User-selected bookings and filter criteria.
+- **Processing**: Authorization check, PII minimization, and file generation.
+- **Output**: Prediction results in CSV format.
+
+---
+
+## 7. AI & Data Requirements
+
+### 7.1 Data Scope
+- Utilizes City Hotel reservation records from the public Hotel Booking Demand dataset.
+- Raw City Hotel dataset contains 79,330 records.
+- Cleaned dataset used for modeling contains 78,669 records.
+- Dataset timeframe spans from July 2015 to August 2017.
+
+### 7.2 Target Variable
+| Item | Value |
 |---|---|
-| 변수명 | `cancellation` (또는 `is_canceled`) |
-| 유형 | 범주형 이진 값 |
-| 값 0 | 미취소 |
-| 값 1 | 취소 |
+| Variable Name | `cancellation` (or `is_canceled`) |
+| Type | Categorical Binary |
+| Value 0 | Not Canceled |
+| Value 1 | Canceled |
 
-### 7.3 AI 모델 입력 특성 (15개)
+### 7.3 AI Model Input Features (15 Features)
 
-| 번호 | 변수명 | 유형 | 의미 |
+| No. | Feature Name | Type | Description |
 |---:|---|---|---|
-| 1 | `lead_time` | 수치형 | 예약 시점부터 도착일까지의 기간 |
-| 2 | `num_nights_weekend` | 수치형 | 주말 숙박일 수 |
-| 3 | `num_nights_week` | 수치형 | 주중 숙박일 수 |
-| 4 | `meal_type` | 범주형 | 예약 식사 유형 |
-| 5 | `market_segment` | 범주형 | 예약 시장 세그먼트 |
-| 6 | `is_repeated_guest` | 범주형 | 재방문 고객 여부 |
-| 7 | `num_cancel_prev_resv` | 수치형 | 과거 취소 예약 수 |
-| 8 | `num_checkin_prev_resv` | 수치형 | 과거 미취소 또는 체크인 예약 수 |
-| 9 | `reserved_room_type` | 범주형 | 예약 객실 유형 |
-| 10 | `deposit_type` | 범주형 | 보증금 유형 |
-| 11 | `customer_type` | 범주형 | 고객 유형 |
-| 12 | `average_daily_rate` | 수치형 | 평균 일일 객실 요금 |
-| 13 | `num_guest` | 수치형 | 예약 투숙객 수 |
-| 14 | `country_code` | 범주형 | 고객 국가 코드 |
-| 15 | `arrival_month` | 수치형 | 도착 월 |
+| 1 | `lead_time` | Continuous | Number of days between booking date and arrival date |
+| 2 | `num_nights_weekend` | Continuous | Number of weekend nights stayed |
+| 3 | `num_nights_week` | Continuous | Number of week nights stayed |
+| 4 | `meal_type` | Categorical | Type of meal booked |
+| 5 | `market_segment` | Categorical | Market segment designation |
+| 6 | `is_repeated_guest` | Categorical | Repeated guest flag |
+| 7 | `num_cancel_prev_resv` | Continuous | Number of previous canceled bookings |
+| 8 | `num_checkin_prev_resv` | Continuous | Number of previous non-canceled or checked-in bookings |
+| 9 | `reserved_room_type` | Categorical | Type of room reserved |
+| 10 | `deposit_type` | Categorical | Type of deposit made |
+| 11 | `customer_type` | Categorical | Type of customer/booking |
+| 12 | `average_daily_rate` | Continuous | Average Daily Rate (ADR) |
+| 13 | `num_guest` | Continuous | Total number of guests |
+| 14 | `country_code` | Categorical | Customer country code |
+| 15 | `arrival_month` | Continuous | Month of arrival |
 
-### 7.4 전처리 요구사항
-- City Hotel 레코드만 사용한다.
-- 성인 투숙객 수가 0인 레코드를 제거한다 (`adults == 0`).
-- `distribution_channel` 값이 `Undefined`인 레코드를 제거한다.
-- `average_daily_rate`의 비정상적으로 높은 값(`adr >= 400`)을 제외한다.
-- 주중과 주말 숙박일 수의 합이 0인 레코드를 제거한다.
-- 목표 변수와 15개 입력 변수의 데이터 유형을 학습 스키마와 일치시킨다.
+### 7.4 Preprocessing Requirements
+- Filter and retain City Hotel records only.
+- Drop records where adult count is zero (`adults == 0`).
+- Drop records where `distribution_channel` is `Undefined`.
+- Exclude extreme outliers in `average_daily_rate` (`adr >= 400`).
+- Remove records where the sum of week and weekend nights equals zero.
+- Align data types of target and 15 input variables with the training schema.
 
-### 7.5 데이터 분할 요구사항
-- 시계열 누수(Data Leakage)를 방지하기 위해 **5-Fold 시계열 교차검증(Time-Series Cross-Validation)** 방식을 적용한다.
-- 개발 세트(Dev Set)와 최종 테스트 세트(Final Test Set)를 시간 순서에 따라 분할한다.
+### 7.5 Data Split Requirements
+- Apply a **5-Fold Time-Series Cross-Validation** strategy to prevent temporal data leakage.
+- Split the Development Set and Final Test Set chronologically.
 
 ---
 
-## 8. 시스템 요구사항
+## 8. System Requirements
 
-### 8.1 시스템 흐름 (Data Workflow)
-`예약 데이터 입력 → 15개 특성 검증 및 전처리 → 15개 특성 AI 모델 추론 → 예측 결과 저장 → 예약 목록 및 상세 조회`
+### 8.1 System Data Workflow
+`Reservation Data Input → 15-Feature Validation & Preprocessing → 15-Feature AI Inference → Prediction Storage → List & Detail Views`
 
 ### 8.2 Frontend
-- **핵심 기능**:
-  - 예약 데이터 업로드
-  - 취소 확률 기준 예약 목록 조회
-  - 예약 상세 정보 및 15개 입력 특성(Feature) 조회
-  - 예측 결과 집계 대시보드 조회
-- **배포 및 호스팅**: Render (Frontend Hosting)
+- **Core Features**:
+  - Reservation data upload
+  - Priority reservation list by cancellation probability
+  - Reservation detail view with 15 input features
+  - Aggregate dashboard for prediction statistics
+- **Deployment & Hosting**: Render (Frontend Hosting)
 
 ### 8.3 Backend
-- **핵심 기능**:
-  - 사용자 인증 및 권한 확인 (Auth)
-  - 15개 입력 데이터 검증 및 전처리
-  - AI 모델 추론 요청 처리
-  - 예측 결과 및 직원 조치 이력 저장
-  - 예약 목록, 상세, 집계 조회 API 제공
-- **구현 프레임워크**: Python FastAPI
-- **배포 및 호스팅**: Render (Backend Web Server)
+- **Core Features**:
+  - User authentication and authorization (Auth)
+  - 15-feature input validation and preprocessing
+  - AI model inference request handling
+  - Logging of prediction results and staff actions
+  - REST APIs for list, detail, and summary views
+- **Framework**: Python FastAPI
+- **Deployment & Hosting**: Render (Backend Web Server)
 
 ### 8.4 AI/ML
-- **모델 관리**: 15개 특성을 입력받는 AI 모델 버전 관리
-- **운용 방식**:
-  - 모델 버전 및 입력 스키마(15개 필드) 버전 동시 관리
-- **구현 현황**: 서비스 추론 연동 구현 예정
+- **Model Management**: Versioning and management of AI models accepting 15 input features.
+- **Operations**:
+  - Concurrent version control of model artifacts and 15-field input schemas.
+- **Implementation Status**: Inference integration planned.
 
-### 8.5 데이터 저장 (Database)
-- **핵심 데이터**: PostgreSQL (Render Hosted PostgreSQL Database Server)
-- **저장 대상**: 예약 식별자(ID), 입력 데이터 버전, 15개 입력값, 취소 확률, 예측 클래스, 모델 버전, 예측 시각, 직원 조치 이력
+### 8.5 Database
+- **Core Storage**: PostgreSQL (Render Hosted PostgreSQL Database Server)
+- **Stored Data**: Booking ID, input data version, 15 feature values, cancellation probability, predicted class, model version, timestamp, and staff action logs.
 
-### 8.6 외부 연동 및 배포 환경
-- **개발 도구 (Development Tools)**: IntelliJ IDEA, PyCharm, Claude Code
-- **배포 플랫폼 (Deployment Platform)**: Render
-  - Frontend, Backend Web Server, PostgreSQL Database Server 모두 Render 환경에 호스팅 및 배포
-- **외부 연동 범위**:
-  - 현재 확인된 외부 API 없음
-  - PMS(호텔 자산 관리 시스템) 연동은 현 단계 연동 범위에서 제외
-
----
-
-## 9. 비기능 요구사항
-
-### 9.1 성능
-- 단일 예약과 배치 예약을 모두 처리할 수 있어야 한다.
-- 15개 특성 데이터 추론 시 사용자 요청의 목표 응답 시간을 확정해야 한다.
-- 배치 처리에서 성공한 행과 실패한 행을 구분해 반환해야 한다.
-
-### 9.2 안정성
-- 필수 15개 특성이 누락된 행이 전체 배치 실패로 이어지지 않도록 오류 행을 분리해야 한다.
-- 모델 버전과 전처리 버전을 기록해 예측 결과를 재현할 수 있어야 한다.
-- 추론 실패 시 자동 고객 조치가 발생하지 않아야 한다.
-- 서비스 장애 시 기존 수작업 절차를 계속 사용할 수 있어야 한다.
-
-### 9.3 사용성
-- 취소 확률과 예측 클래스를 명확히 구분해 표시해야 한다.
-- 예측 결과가 확정된 사실이 아니라 확률 기반 참고 정보임을 표시해야 한다.
-- 예약 목록을 정렬, 검색 및 필터링할 수 있어야 한다.
-- 오류 메시지는 15개 특성 중 문제가 발생한 필드와 수정 방법을 포함해야 한다.
-
-### 9.4 확장성 및 유지보수성
-- 호텔별 데이터와 모델 버전을 분리할 수 있어야 한다.
-- 입력 검증, 전처리, 추론 및 저장 모듈을 독립적으로 분리해야 한다.
-- 모델 성능과 데이터 분포 변화를 정기적으로 확인할 수 있어야 한다.
+### 8.6 Infrastructure & Deployment
+- **Development Tools**: IntelliJ IDEA, PyCharm, Claude Code
+- **Deployment Platform**: Render
+  - Frontend, Backend Web Server, and PostgreSQL Database Server hosted and deployed on Render.
+- **External Integrations**:
+  - No active external APIs in current scope.
+  - Direct PMS (Property Management System) integration excluded from current phase.
 
 ---
 
-## 10. 범위 및 제약사항
+## 9. Non-Functional Requirements
 
-### 10.1 현재 범위
-- City Hotel 데이터 정제 (79,330건 → 78,669건)
-- 15개 입력 특성 정의 및 데이터 스키마 확정
-- 15개 특성 기반 AI 모델 요구사항 정의 및 평가 수용 기준 수립
+### 9.1 Performance
+- Support both single-booking real-time queries and batch data uploads.
+- Establish target response time SLAs for 15-feature inference calls.
+- Process batch records gracefully by separating successful rows from failed rows.
 
-### 10.2 다음 구현 범위
-- 15개 특성 기반 예약 데이터 입력 및 검증
-- AI 모델 추론 API 연동
-- 예약 우선순위 목록과 상세 조회 구현
-- 예측 결과 및 직원 조치 이력 저장
-- 사용자 인증과 접근 권한
-- 서비스 배포
+### 9.2 Reliability & Stability
+- Isolate schema error rows to prevent entire batch execution failures.
+- Log model and preprocessing versions to ensure full reproducibility of results.
+- Ensure model inference failures never trigger automated guest actions.
+- Allow staff to revert to standard manual procedures during system outages.
 
-### 10.3 제외 범위
-- 자동 예약 취소
-- 자동 가격 및 환불 정책 변경
-- 자동 고객 연락
-- PMS 또는 예약 관리 시스템 연동
+### 9.3 Usability
+- Clearly distinguish between cancellation probabilities and predicted binary classes.
+- Explicitly state that prediction results are probabilistic reference indicators, not confirmed facts.
+- Provide sorting, searching, and filtering capabilities on reservation lists.
+- Deliver clear error messages specifying problematic fields among the 15 features and suggested corrections.
 
-### 10.4 제약사항
-- 단일 공개 데이터셋의 City Hotel 기록을 사용하므로 다른 호텔에서 동일한 성능을 보장할 수 없다.
-- 데이터가 2015년부터 2017년까지의 기록이므로 현재 예약 패턴과 차이가 있을 수 있다.
-- 실제 사용자 환경의 업무 시간, 취소율 및 매출 효과가 검증되지 않았다.
+### 9.4 Scalability & Maintainability
+- Support tenant isolation for hotel-specific data and model versions.
+- Maintain clean modular separation across validation, preprocessing, inference, and persistence layers.
+- Establish periodic monitoring procedures for model performance and input data drift.
 
 ---
 
-## 11. 성공 지표 및 완료 조건
+## 10. Scope & Constraints
 
-### 11.1 AI 모델 성능 목표 및 수용 기준 (Key Performance Indicators)
+### 10.1 Current Scope
+- City Hotel dataset cleaning (79,330 → 78,669 records).
+- Definition and schema lockdown of the 15 input features.
+- AI model requirement specification and acceptance criteria definition for 15-feature models.
 
-* **주요 평가 지표 (Primary Metric)**: F1-Score
-* **보조 평가 지표 (Secondary Metrics)**: ROC-AUC, Accuracy
+### 10.2 Next Implementation Phase
+- 15-feature booking data upload and validation routines.
+- AI model inference API integration.
+- Priority review list and detailed reservation views.
+- Persistence of prediction results and staff action histories.
+- User authentication and role-based access control.
+- Live service deployment.
 
-| 지표 | 최소 수용 기준 (Minimum Threshold) | 목표 성능 (Target Goal) | 측정 및 평가 방법 |
+### 10.3 Out of Scope
+- Automated booking cancellations.
+- Automated room rate or refund policy adjustments.
+- Automated guest messaging or notifications.
+- Direct integration with third-party PMS or reservation software.
+
+### 10.4 Constraints
+- Trained on a single public dataset (City Hotel); performance on other hotel properties cannot be guaranteed without re-evaluation.
+- Historical data covers 2015–2017, which may differ from current booking dynamics.
+- Operational impact on staff working hours, cancellation rates, and revenue remains to be empirically verified in production.
+
+---
+
+## 11. Success Metrics & Completion Criteria
+
+### 11.1 AI Model Performance Targets & Acceptance Criteria (KPIs)
+
+* **Primary Metric**: F1-Score
+* **Secondary Metrics**: ROC-AUC, Accuracy
+
+| Metric | Minimum Acceptance Threshold | Target Goal | Evaluation Method |
 | :--- | :---: | :---: | :--- |
-| **F1-Score** | **≥ 0.70** | **≥ 0.75** | 5-Fold 시계열 교차검증 평균 |
-| **ROC-AUC** | **≥ 0.85** | **≥ 0.90** | Final Test Set 평가 |
-| **Accuracy** | **≥ 0.70** | **≥ 0.75** | 전체 예측 정확도 |
+| **F1-Score** | **≥ 0.70** | **≥ 0.75** | 5-Fold Time-Series Cross-Validation Mean |
+| **ROC-AUC** | **≥ 0.85** | **≥ 0.90** | Final Test Set Evaluation |
+| **Accuracy** | **≥ 0.70** | **≥ 0.75** | Overall Prediction Accuracy |
 
-### 11.2 제품 지표
-- 직원이 우선 검토할 예약을 찾는 데 걸리는 시간
-- 직원의 예측 결과 이해도
-- 예측 결과가 검토된 비율
-- 불필요한 고객 연락 발생률
-- 실제 취소 중 사전에 우선 검토된 예약의 비율
+> **Acceptance Criteria**:
+> 1. To minimize undetected cancellation risk (False Negatives), the model must achieve a **Recall of ≥ 0.70** on the cancellation class to be approved for production inference.
+> 2. The standard deviation (SD) of ROC-AUC across cross-validation folds must remain **within 0.03** to ensure temporal stability.
+> 3. Failure to meet minimum acceptance thresholds will trigger feature engineering iteration and model retraining.
 
-### 11.3 완료 조건
-- 15개 입력 특성의 이름과 데이터 유형이 학습 스키마와 서비스 입력 스키마에서 일치한다.
-- 전처리 데이터 버전과 데이터 분할 방식이 고정된다.
-- AI 모델이 버전 관리되고 추론 요청에 정상 응답한다.
-- 입력 검증부터 15개 특성 확인 및 예측 결과 조회까지의 전체 흐름이 동작한다.
-- 예측 결과와 모델 버전이 저장된다.
-- 목표 사용자를 대상으로 기본 사용자 흐름을 검증한다.
+### 11.2 Product Metrics
+- Time required for staff to identify high-priority review bookings.
+- Staff comprehension rate of prediction outputs.
+- Percentage of predicted high-risk bookings actually reviewed by staff.
+- Rate of unnecessary guest outreach incidents.
+- Ratio of actual cancellations that were pre-identified and reviewed.
+
+### 11.3 Completion Criteria
+- Feature names and data types of all 15 inputs match between training and inference schemas.
+- Preprocessing pipeline versions and time-series data split parameters are locked.
+- AI model artifacts are version-controlled and responding to inference calls.
+- End-to-end flow from input validation to prediction display is operational.
+- Prediction outputs and model versions are stored correctly.
+- Basic user workflows are validated against target user scenarios.
 
 ---
 
-## 12. 출시 계획 및 미결정 사항
+## 12. Release Plan & Open Items
 
-### 12.1 1차 구현
-1. 최종 데이터 버전과 전처리 규칙 확정
-2. 15개 특성의 범주형/수치형 입력 규칙 확정
-3. AI 모델의 서비스 추론 API 연동
-4. 15개 입력 특성 검증 기능 구현
-5. 예약 목록과 상세 조회 구현
-6. 예측 결과와 모델 버전 저장
-7. 보안 및 개인정보 보호 요구사항 적용
+### 12.1 Phase 1 Implementation
+1. Lock final dataset version and preprocessing rules.
+2. Finalize categorical and continuous validation rules for all 15 features.
+3. Integrate AI model inference APIs.
+4. Build 15-feature input validation routines.
+5. Develop priority booking list and detail views.
+6. Implement storage for predictions and model versions.
+7. Apply security and data privacy safeguards.
 
-### 12.2 검증 및 개선
-1. 모델의 확률 보정 상태 및 성능 모니터링
-2. 사용자 시험을 통한 화면 이해도와 업무 시간 측정
-3. 최근 실제 호텔 데이터로 외부 검증 절차 수립
+### 12.2 Verification & Iteration
+1. Monitor probability calibration and post-launch model performance.
+2. Conduct user testing to measure dashboard usability and time savings.
+3. Establish external validation procedures using recent real-world hotel data.
