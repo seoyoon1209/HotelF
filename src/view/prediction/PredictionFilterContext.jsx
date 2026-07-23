@@ -50,6 +50,12 @@ export function PredictionFilterProvider({ children }) {
     );
   };
 
+  const markActionNotDone = (reservationId) => {
+    setReservations((prev) =>
+      prev.map((r) => (r.reservation_id === reservationId ? { ...r, action_status: "NONE" } : r))
+    );
+  };
+
   const applyPrediction = (reservationId, probability) => {
     setReservations((prev) =>
       prev.map((r) =>
@@ -85,6 +91,7 @@ export function PredictionFilterProvider({ children }) {
     error,
     reservations,
     markActionDone,
+    markActionNotDone,
     applyPrediction,
     getReservationByCode,
     period,

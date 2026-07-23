@@ -7,5 +7,9 @@ export const createReservationAction = (reservationId, payload) =>
 export const getReservationActions = (reservationId) =>
   instance.get(`/api/reservations/${reservationId}/actions/`);
 
+// Reverts an action ("mark as not taken"): removes the reservation's action records.
+export const deleteReservationActions = (reservationId) =>
+  instance.delete(`/api/reservations/${reservationId}/actions/`);
+
 export const getActionReport = (weeks = 4) =>
   instance.get("/api/actions/report/", { params: { weeks } });

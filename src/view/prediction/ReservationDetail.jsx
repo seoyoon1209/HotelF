@@ -9,6 +9,7 @@ import {
   FaPlay,
   FaLightbulb,
   FaTicket,
+  FaCheck,
   FaMagnifyingGlassChart,
   FaWandMagicSparkles,
 } from "react-icons/fa6";
@@ -16,11 +17,12 @@ import PredictionBadge from "src/components/prediction/PredictionBadge";
 import { useToast } from "src/components/prediction/ToastProvider";
 import { simulateProbability, estimateCost } from "src/data/predictionDemoData";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
-import { createReservationAction } from "src/api/reservationActionApi";
+import { createReservationAction, deleteReservationActions } from "src/api/reservationActionApi";
 import { createPrediction } from "src/api/predictionApi";
 import { getAiInsight } from "src/api/aiInsightApi";
 import { DEPOSIT_LABEL, SEGMENT_LABEL, MEAL_LABEL } from "src/data/labels";
 import LoadingState from "src/components/common/LoadingState";
+import { formatUSD } from "src/data/currency";
 
 const COMBOS = [
   { key: "none", title: "Do Nothing", discountPercent: 0, breakfastCoupon: false },
@@ -33,7 +35,7 @@ function ReservationDetail() {
   const { reservationId } = useParams();
   const navigate = useNavigate();
   const showToast = useToast();
-  const { loading, getReservationByCode, markActionDone, applyPrediction } = usePredictionFilters();
+  const { loading, getReservationByCode, markActionDone, markActionNotDone, applyPrediction } = usePredictionFilters();
   const reservation = getReservationByCode(reservationId);
   const requestedPredictionRef = useRef(null);
 
@@ -147,6 +149,20 @@ function ReservationDetail() {
       .finally(() => setApplying(false));
   };
 
+  const undoAction = () => {
+    setApplying(true);
+    deleteReservationActions(reservation.reservation_id)
+      .then(() => {
+        markActionNotDone(reservation.reservation_id);
+        setApplied(false);
+        showToast({ title: "Marked as not taken", message: "The recorded action has been removed from the report.", tone: "neutral" });
+      })
+      .catch(() => {
+        showToast({ title: "Failed to revert", message: "Please try again shortly.", tone: "neutral" });
+      })
+      .finally(() => setApplying(false));
+  };
+
   const labelChanged = result && result.label !== reservation.risk_label;
 
   return (
@@ -185,7 +201,7 @@ function ReservationDetail() {
               <div className="text-xs font-medium uppercase tracking-wide text-slate-400">Key Reservation Features</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 <FeatureChip label="Lead Time" value={`${reservation.lead_time} days`} />
-                <FeatureChip label="Nightly Rate (ADR)" value={`₩${reservation.adr.toLocaleString()}`} />
+                <FeatureChip label="Nightly Rate (ADR)" value={formatUSD(reservation.adr)} />
                 <FeatureChip label="Meal Plan" value={MEAL_LABEL[reservation.meal] ?? reservation.meal} />
                 <FeatureChip label="Deposit" value={DEPOSIT_LABEL[reservation.deposit_type] ?? reservation.deposit_type} />
                 <FeatureChip label="Segment" value={SEGMENT_LABEL[reservation.market_segment] ?? reservation.market_segment} />
@@ -335,25 +351,51 @@ function ReservationDetail() {
             </div>
           </div>
 
-          {labelChanged && (
-            <div className="rounded-2xl border border-brand/30 bg-brand/5 p-5">
-              <div className="flex items-center gap-2 text-brand">
+          {/* Action panel: appears once a simulation has been run, regardless of whether the label flipped.
+              Lets staff record ("Action Taken") or revert ("Not Taken") the intervention; both flow into the Report. */}
+          {result && (
+            <div className={`rounded-2xl border p-5 ${labelChanged ? "border-brand/30 bg-brand/5" : "border-slate-200 bg-white"}`}>
+              <div className={`flex items-center gap-2 ${labelChanged ? "text-brand" : "text-slate-900"}`}>
                 <FaLightbulb className="h-4 w-4" />
-                <h3 className="font-semibold">This action is recommended</h3>
+                <h3 className="font-semibold">{labelChanged ? "This action is recommended" : "Record Intervention"}</h3>
               </div>
               <p className="mt-1.5 text-sm text-slate-600">
-                Applying a {discountPercent}% discount{breakfastCoupon ? " + breakfast coupon" : ""} flips the predicted label from{" "}
-                <b>Predicted Cancellation → Predicted Keep</b>.
+                {labelChanged ? (
+                  <>
+                    Applying a {discountPercent}% discount{breakfastCoupon ? " + breakfast coupon" : ""} flips the predicted label from{" "}
+                    <b>Predicted Cancellation → Predicted Keep</b>.
+                  </>
+                ) : (
+                  <>The intervention did not flip the predicted label, but you can still record it as an action taken.</>
+                )}
               </p>
-              <button
-                type="button"
-                onClick={applyAction}
-                disabled={applied || applying}
-                className="mt-3 flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
-              >
-                <FaTicket className="h-3.5 w-3.5" />
-                {applied ? "Applied" : applying ? "Issuing..." : "Apply (Issue Coupon)"}
-              </button>
+
+              {applied ? (
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3.5 py-1.5 text-sm font-semibold text-green-700">
+                    <FaCheck className="h-3.5 w-3.5" />
+                    Action Taken
+                  </span>
+                  <button
+                    type="button"
+                    onClick={undoAction}
+                    disabled={applying}
+                    className="text-xs font-medium text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline disabled:opacity-60"
+                  >
+                    {applying ? "Reverting..." : "Mark as Not Taken"}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={applyAction}
+                  disabled={applying}
+                  className="mt-3 flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
+                >
+                  <FaTicket className="h-3.5 w-3.5" />
+                  {applying ? "Recording..." : "Mark as Action Taken (Issue Coupon)"}
+                </button>
+              )}
             </div>
           )}
 
@@ -368,8 +410,8 @@ function ReservationDetail() {
                 <div className="flex items-center justify-between border-t border-slate-100 pt-2 font-semibold">
                   <span className="text-slate-700">Net Effect</span>
                   <span className={cost.net >= 0 ? "text-green-600" : "text-red-600"}>
-                    {cost.net >= 0 ? "+" : ""}
-                    ₩{cost.net.toLocaleString()}
+                    {cost.net >= 0 ? "+" : "-"}
+                    {formatUSD(Math.abs(cost.net))}
                   </span>
                 </div>
               </div>
@@ -403,7 +445,7 @@ function CostRow({ label, value }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-slate-500">{label}</span>
-      <span className="font-medium text-slate-900">₩{value.toLocaleString()}</span>
+      <span className="font-medium text-slate-900">{formatUSD(value)}</span>
     </div>
   );
 }

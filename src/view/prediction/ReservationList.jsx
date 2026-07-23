@@ -8,6 +8,7 @@ import { useToast } from "src/components/prediction/ToastProvider";
 import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
 import { simulateProbability } from "src/data/predictionDemoData";
 import LoadingState from "src/components/common/LoadingState";
+import { formatUSD } from "src/data/currency";
 
 const STATUS_CHIPS = [
   { value: "all", label: "All" },
@@ -199,7 +200,7 @@ function ReservationList() {
                   <td className="px-3 py-3 text-slate-600">{r.customer_name}</td>
                   <td className="px-3 py-3 text-slate-600">{r.check_in_date}</td>
                   <td className="px-3 py-3 text-slate-600">D-{r.lead_time}</td>
-                  <td className="px-3 py-3 text-slate-600">₩{r.adr.toLocaleString()}</td>
+                  <td className="px-3 py-3 text-slate-600">{formatUSD(r.adr)}</td>
                   <td className="px-3 py-3 text-slate-600">{r.meal === "BB" ? "Included" : "Not Included"}</td>
                   <td className="px-3 py-3">
                     <PredictionBadge label={r.risk_label} />

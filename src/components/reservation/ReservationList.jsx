@@ -6,6 +6,7 @@ import { getReservations } from "src/api/reservationApi";
 import RiskBadge from "src/components/common/RiskBadge";
 import StatusBadge from "src/components/common/StatusBadge";
 import LoadingState from "src/components/common/LoadingState";
+import { formatUSD } from "src/data/currency";
 
 const PAGE_SIZE = 10;
 
@@ -154,7 +155,7 @@ function ReservationList() {
                     {reservation.check_in_date} → {reservation.check_out_date}
                   </td>
                   <td className="px-4 py-3 text-slate-600">
-                    {reservation.adr != null ? `₩${Number(reservation.adr).toLocaleString()}` : "-"}
+                    {formatUSD(reservation.adr)}
                   </td>
                   <td className="px-4 py-3">
                     <StatusBadge status={reservation.reservation_status} />

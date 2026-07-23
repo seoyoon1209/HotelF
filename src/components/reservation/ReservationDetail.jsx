@@ -7,6 +7,7 @@ import { getPredictionsByReservation, getModelInfo } from "src/api/predictionApi
 import RiskBadge from "src/components/common/RiskBadge";
 import StatusBadge from "src/components/common/StatusBadge";
 import LoadingState from "src/components/common/LoadingState";
+import { formatUSD } from "src/data/currency";
 
 const SUGGESTED_ACTIONS = [
   { key: "recheck", label: "Follow-up call to confirm" },
@@ -97,11 +98,11 @@ function ReservationDetail() {
           />
           <Field
             label="ADR"
-            value={reservation.adr != null ? `₩${Number(reservation.adr).toLocaleString()}` : "-"}
+            value={formatUSD(reservation.adr)}
           />
           <Field
             label="Total Amount"
-            value={reservation.total_price != null ? `₩${Number(reservation.total_price).toLocaleString()}` : "-"}
+            value={formatUSD(reservation.total_price)}
           />
           <Field label="Meal Plan" value={reservation.meal_name ?? "-"} />
           <Field label="Deposit Type" value={reservation.deposit_name ?? "-"} />
