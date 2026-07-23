@@ -21,6 +21,7 @@ import { createPrediction } from "src/api/predictionApi";
 import { getAiInsight } from "src/api/aiInsightApi";
 import { DEPOSIT_LABEL, SEGMENT_LABEL, MEAL_LABEL } from "src/data/labels";
 import LoadingState from "src/components/common/LoadingState";
+import { formatUSD } from "src/data/currency";
 
 const COMBOS = [
   { key: "none", title: "Do Nothing", discountPercent: 0, breakfastCoupon: false },
@@ -185,7 +186,7 @@ function ReservationDetail() {
               <div className="text-xs font-medium uppercase tracking-wide text-slate-400">Key Reservation Features</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 <FeatureChip label="Lead Time" value={`${reservation.lead_time} days`} />
-                <FeatureChip label="Nightly Rate (ADR)" value={`₩${reservation.adr.toLocaleString()}`} />
+                <FeatureChip label="Nightly Rate (ADR)" value={formatUSD(reservation.adr)} />
                 <FeatureChip label="Meal Plan" value={MEAL_LABEL[reservation.meal] ?? reservation.meal} />
                 <FeatureChip label="Deposit" value={DEPOSIT_LABEL[reservation.deposit_type] ?? reservation.deposit_type} />
                 <FeatureChip label="Segment" value={SEGMENT_LABEL[reservation.market_segment] ?? reservation.market_segment} />
@@ -368,8 +369,8 @@ function ReservationDetail() {
                 <div className="flex items-center justify-between border-t border-slate-100 pt-2 font-semibold">
                   <span className="text-slate-700">Net Effect</span>
                   <span className={cost.net >= 0 ? "text-green-600" : "text-red-600"}>
-                    {cost.net >= 0 ? "+" : ""}
-                    ₩{cost.net.toLocaleString()}
+                    {cost.net >= 0 ? "+" : "-"}
+                    {formatUSD(Math.abs(cost.net))}
                   </span>
                 </div>
               </div>
@@ -403,7 +404,7 @@ function CostRow({ label, value }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-slate-500">{label}</span>
-      <span className="font-medium text-slate-900">₩{value.toLocaleString()}</span>
+      <span className="font-medium text-slate-900">{formatUSD(value)}</span>
     </div>
   );
 }

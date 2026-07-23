@@ -13,6 +13,7 @@ import { getModelInfo } from "src/api/predictionApi";
 import RiskBadge from "src/components/common/RiskBadge";
 import RiskDistributionBar from "src/components/common/RiskDistributionBar";
 import LoadingState from "src/components/common/LoadingState";
+import { formatUSD } from "src/data/currency";
 
 const RISK_CHIPS = [
   { value: "all", label: "All" },
@@ -199,7 +200,7 @@ function PredictionDashboard() {
                         <td className="px-5 py-3 font-medium text-slate-900">{r.reservation_code}</td>
                         <td className="px-5 py-3 text-slate-600">{r.check_in_date}</td>
                         <td className="px-5 py-3 text-slate-600">
-                          {r.adr != null ? `₩${Number(r.adr).toLocaleString()}` : "-"}
+                          {formatUSD(r.adr)}
                         </td>
                         <td className="px-5 py-3 font-semibold text-red-600">
                           {r.cancellation_probability != null
