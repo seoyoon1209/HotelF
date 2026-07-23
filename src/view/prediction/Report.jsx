@@ -2,21 +2,83 @@
 import { useEffect, useState } from "react";
 import { FaDownload, FaCircleInfo } from "react-icons/fa6";
 import { useToast } from "src/components/prediction/ToastProvider";
-import { getActionReport } from "src/api/reservationActionApi";
+import { getActionReport, getActionExport } from "src/api/reservationActionApi";
 import { getModelInfo } from "src/api/predictionApi";
+import { estimateCost } from "src/data/predictionDemoData";
+import { formatUSD } from "src/data/currency";
 import LoadingState from "src/components/common/LoadingState";
 
 const REPORT_WEEKS = 8;
 
-function downloadCsv(rows) {
-  const header = ["Period", "Actions Taken", "Label Flip Successes"];
-  const body = rows.map((row) => [`${row.period_start} ~ ${row.period_end}`, row.actions_taken, row.label_flipped]);
-  const csv = [header, ...body].map((r) => r.join(",")).join("\n");
+// Escapes a single CSV cell (wraps in quotes when it contains a comma/quote/newline).
+function csvCell(value) {
+  const s = String(value ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+// Turns a detailed export row (one reservation) into a CSV line array.
+function toDetailRow(r) {
+  const consulted = r.consulted;
+  const consultedAt = consulted && r.applied_at ? new Date(r.applied_at).toLocaleString() : "-";
+
+  let intervention = "-";
+  let cost = "-";
+  let beforeAfter = "-";
+  let flip = "-";
+
+  if (consulted) {
+    const parts = [];
+    if (r.discount_percent) parts.push(`Discount ${r.discount_percent}%`);
+    if (r.breakfast_coupon) parts.push("Breakfast Coupon");
+    intervention = parts.length ? parts.join(" + ") : "No-cost outreach";
+
+    const children = (r.child_count ?? 0) + (r.baby_count ?? 0);
+    const { couponCost } = estimateCost(
+      { adr: Number(r.adr), nights: r.nights, adults: r.adult_count, children },
+      { discountPercent: r.discount_percent ?? 0, breakfastCoupon: r.breakfast_coupon ?? false }
+    );
+    cost = formatUSD(couponCost);
+
+    const pb = Math.round(Number(r.probability_before) * 100);
+    const pa = Math.round(Number(r.probability_after) * 100);
+    beforeAfter = `${pb}% ${r.label_before} → ${pa}% ${r.label_after}`;
+    flip = r.label_before === "CANCEL" && r.label_after === "KEEP" ? "Yes" : "No";
+  }
+
+  return [
+    consultedAt,
+    r.reservation_code,
+    r.customer_name ?? "",
+    r.hotel_name ?? "",
+    r.check_in_date,
+    consulted ? "Yes" : "No",
+    intervention,
+    cost,
+    beforeAfter,
+    flip,
+  ];
+}
+
+function downloadCsv(exportRows) {
+  const header = [
+    "Consulted At",
+    "Reservation No.",
+    "Customer",
+    "Hotel/Branch",
+    "Check-in Date",
+    "Consulted",
+    "Intervention",
+    "Coupon Cost (USD)",
+    "Prediction Before → After",
+    "Label Flip",
+  ];
+  const body = exportRows.map(toDetailRow);
+  const csv = [header, ...body].map((row) => row.map(csvCell).join(",")).join("\n");
   const blob = new Blob([`﻿${csv}`], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = "hoteling_action_history.csv";
+  link.download = "hoteling_consulting_detail.csv";
   link.click();
   URL.revokeObjectURL(url);
 }
@@ -24,6 +86,7 @@ function downloadCsv(rows) {
 function Report() {
   const showToast = useToast();
   const [rows, setRows] = useState([]);
+  const [exportRows, setExportRows] = useState([]);
   const [modelInfo, setModelInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -31,11 +94,12 @@ function Report() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    Promise.all([getActionReport(REPORT_WEEKS), getModelInfo()])
-      .then(([reportRes, modelRes]) => {
+    Promise.all([getActionReport(REPORT_WEEKS), getModelInfo(), getActionExport()])
+      .then(([reportRes, modelRes, exportRes]) => {
         if (cancelled) return;
         setRows(reportRes.data);
         setModelInfo(modelRes.data);
+        setExportRows(exportRes.data);
         setError(null);
       })
       .catch((err) => {
@@ -55,8 +119,8 @@ function Report() {
   const successRate = totalActions === 0 ? 0 : totalFlipped / totalActions;
 
   const handleExport = () => {
-    downloadCsv(rows);
-    showToast({ title: "CSV download complete", message: "hoteling_action_history.csv", tone: "success" });
+    downloadCsv(exportRows);
+    showToast({ title: "CSV download complete", message: "hoteling_consulting_detail.csv", tone: "success" });
   };
 
   return (
@@ -69,7 +133,7 @@ function Report() {
         <button
           type="button"
           onClick={handleExport}
-          disabled={rows.length === 0}
+          disabled={exportRows.length === 0}
           className="flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40"
         >
           <FaDownload className="h-3.5 w-3.5" />

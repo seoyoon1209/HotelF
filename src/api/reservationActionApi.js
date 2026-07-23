@@ -13,3 +13,6 @@ export const deleteReservationActions = (reservationId) =>
 
 export const getActionReport = (weeks = 4) =>
   instance.get("/api/actions/report/", { params: { weeks } });
+
+// Detailed per-reservation export for CSV (one row per reservation, latest action attached).
+export const getActionExport = () => instance.get("/api/actions/export/");
