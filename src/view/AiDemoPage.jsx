@@ -1,7 +1,6 @@
 // "AI 맞춤형 고객 관리" 데모 페이지.
-// 예약/예측/모델 정보는 전부 실제 백엔드·DB에서 가져온다. 다만 "연관 요인"과 "추천 마케팅
-// 시나리오"는 실제 LLM 호출 없이, 예약의 실제 속성(세그먼트/보증금/리드타임/식사)을 보고
-// 규칙 기반으로 즉석 생성한 근사치다 — LLM 연동은 2단계 이후 범위.
+// 예약/예측/모델 정보는 전부 실제 백엔드·DB에서 가져온다. "연관 요인"과 "추천 마케팅 시나리오"도
+// 실제 LLM(OpenAI) 호출로 생성한다 (백엔드 GET /reservations/{id}/ai-insight/).
 // "원인 분석"이 아니라 "연관 요인"으로 표현 — 모델은 상관관계만 제공하고 인과관계를 주장하지 않는다.
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -13,8 +12,9 @@ import {
 import RiskBadge from "src/components/common/RiskBadge";
 import LoadingState from "src/components/common/LoadingState";
 import { getReservations } from "src/api/reservationApi";
-import { getModelInfo } from "src/api/predictionApi";
+import { getModelInfo, createPrediction } from "src/api/predictionApi";
 import { getOverbookingSummary } from "src/api/overbookingApi";
+import { getAiInsight } from "src/api/aiInsightApi";
 
 const PROBABILITY_COLOR = {
   LOW: "text-green-600",
@@ -22,54 +22,6 @@ const PROBABILITY_COLOR = {
   HIGH: "text-orange-600",
   CRITICAL: "text-red-600",
 };
-
-// 예약의 실제 속성을 보고 취소 위험과 연관된 요인을 규칙 기반으로 뽑아낸다 (상관관계 설명용).
-function buildFactors(r) {
-  const factors = [];
-  if (r.deposit_name === "No Deposit") {
-    factors.push("보증금 없이 예약되어 취소 부담이 낮음 (deposit_type = No Deposit)");
-  } else if (r.deposit_name === "Non Refund") {
-    factors.push("환불 불가 조건이라 상대적으로 취소 가능성이 낮음 (deposit_type = Non Refund)");
-  }
-  if (r.segment_name === "Groups") {
-    factors.push("단체(Groups) 세그먼트는 일정 변경·취소가 잦은 편");
-  } else if (r.segment_name === "OTA") {
-    factors.push("OTA 유입 예약은 직접예약 대비 평균 취소율이 높은 편");
-  }
-  if (r.lead_time <= 2) {
-    factors.push(`체크인까지 ${r.lead_time}일 — 임박 예약`);
-  } else if (r.lead_time >= 21) {
-    factors.push(`체크인까지 ${r.lead_time}일 남아 아직 변동 여지가 있는 기간`);
-  }
-  if (r.meal_code === "SC") {
-    factors.push("조식 미포함 요금제 (meal = SC)");
-  }
-  if (factors.length === 0) {
-    factors.push("뚜렷한 위험 요인이 관측되지 않음");
-  }
-  return factors;
-}
-
-// 위와 동일한 실제 속성 기반으로, 시도해볼 만한 조치 시나리오를 규칙 기반으로 제안한다.
-function buildScenarios(r) {
-  const scenarios = [];
-  if (r.deposit_name === "No Deposit") {
-    scenarios.push({ title: "보증금 결제 유도", message: "예약 확정을 위해 보증금 결제를 안내해 보세요." });
-  }
-  if (r.meal_code === "SC") {
-    scenarios.push({ title: "조식 쿠폰 제공", message: "무료 조식 쿠폰을 제공하면 유지 가능성을 높일 수 있습니다." });
-  }
-  if (r.segment_name === "Groups" || r.segment_name === "OTA") {
-    scenarios.push({ title: "할인 쿠폰 제안", message: "ADR 할인 쿠폰으로 취소 대신 유지를 유도해 보세요." });
-  }
-  if (r.lead_time <= 2) {
-    scenarios.push({ title: "우선 확인 연락", message: "체크인이 임박했으니 우선적으로 확인 연락을 진행하세요." });
-  }
-  if (scenarios.length === 0) {
-    scenarios.push({ title: "추가 조치 불필요", message: "현재 취소 위험이 낮아 별도 조치가 필요하지 않습니다." });
-  }
-  return scenarios;
-}
 
 function computeLeadTime(checkInDateStr) {
   const today = new Date();
@@ -85,19 +37,48 @@ function AiDemoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [insight, setInsight] = useState(null);
+  const [insightLoading, setInsightLoading] = useState(false);
+  const [insightError, setInsightError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     Promise.all([getReservations(), getModelInfo(), getOverbookingSummary()])
-      .then(([resRes, modelRes, overbookingRes]) => {
+      .then(async ([resRes, modelRes, overbookingRes]) => {
         if (cancelled) return;
-        setReservations(
-          resRes.data.map((r) => ({ ...r, lead_time: computeLeadTime(r.check_in_date) }))
-        );
+        const rows = resRes.data.map((r) => ({ ...r, lead_time: computeLeadTime(r.check_in_date) }));
         setModelInfo(modelRes.data);
         setOverbooking(overbookingRes.data);
         setError(null);
+
+        // 예측이 없는 예약(risk_level == null)은 실제 모델을 돌려서 채운다.
+        const missing = rows.filter((r) => r.risk_level == null);
+        if (missing.length === 0) {
+          setReservations(rows);
+          return;
+        }
+        const results = await Promise.allSettled(
+          missing.map((r) => createPrediction(r.reservation_id))
+        );
+        if (cancelled) return;
+        const filledById = new Map(
+          missing
+            .map((r, i) => [r.reservation_id, results[i]])
+            .filter(([, result]) => result.status === "fulfilled")
+            .map(([id, result]) => [id, result.value.data])
+        );
+        setReservations(
+          rows.map((r) =>
+            filledById.has(r.reservation_id)
+              ? {
+                  ...r,
+                  risk_level: filledById.get(r.reservation_id).risk_level,
+                  cancellation_probability: filledById.get(r.reservation_id).cancellation_probability,
+                }
+              : r
+          )
+        );
       })
       .catch((err) => setError(err))
       .finally(() => {
@@ -119,6 +100,27 @@ function AiDemoPage() {
 
   const selected = highRiskReservations[selectedIndex];
 
+  useEffect(() => {
+    if (!selected) return;
+    let cancelled = false;
+    setInsight(null);
+    setInsightError(false);
+    setInsightLoading(true);
+    getAiInsight(selected.reservation_id)
+      .then((res) => {
+        if (!cancelled) setInsight(res.data);
+      })
+      .catch(() => {
+        if (!cancelled) setInsightError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setInsightLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected?.reservation_id]);
+
   const stats = useMemo(() => {
     const cancelCount = highRiskReservations.length;
     const revenueAtRisk = highRiskReservations.reduce((sum, r) => sum + (Number(r.adr) || 0), 0);
@@ -137,8 +139,8 @@ function AiDemoPage() {
 
       <div className="mt-3 flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
         <FaTriangleExclamation className="mt-0.5 h-4 w-4 shrink-0" />
-        예약·예측·모델 정보는 실제 DB에서 가져옵니다. 연관 요인과 추천 시나리오는 실제 LLM 호출 없이
-        예약 속성 기반 규칙으로 즉석 생성한 근사치입니다.
+        예약·예측·모델 정보는 실제 DB에서 가져옵니다. 연관 요인과 추천 시나리오는 실제 LLM(OpenAI)이
+        예약 속성을 보고 생성합니다 — 예약당 한 번만 호출해 결과를 캐싱합니다.
       </div>
 
       {error && (
@@ -258,34 +260,44 @@ function AiDemoPage() {
                       <FaMagnifyingGlassChart className="h-4 w-4 text-slate-400" />
                       <h3 className="text-sm font-semibold">연관 요인 분석</h3>
                     </div>
-                    <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
-                      {buildFactors(selected).map((factor) => (
-                        <li key={factor}>· {factor}</li>
-                      ))}
-                    </ul>
-                    <p className="mt-1.5 text-xs text-slate-400">
-                      ※ 아래는 상관관계일 뿐 확정된 취소 원인이 아닙니다.
-                    </p>
+                    {insightLoading && (
+                      <p className="mt-2 text-sm text-slate-400">AI가 분석 중입니다...</p>
+                    )}
+                    {insightError && !insightLoading && (
+                      <p className="mt-2 text-sm text-red-500">AI 분석을 불러오지 못했습니다.</p>
+                    )}
+                    {insight && !insightLoading && (
+                      <>
+                        <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
+                          {insight.factors.map((factor) => (
+                            <li key={factor}>· {factor}</li>
+                          ))}
+                        </ul>
+                        <p className="mt-1.5 text-xs text-slate-400">
+                          ※ 아래는 상관관계일 뿐 확정된 취소 원인이 아닙니다.
+                        </p>
 
-                    <div className="mt-5 flex items-center gap-2 text-slate-900">
-                      <FaLightbulb className="h-4 w-4 text-slate-400" />
-                      <h3 className="text-sm font-semibold">추천 마케팅 시나리오</h3>
-                    </div>
-                    <div className="mt-2 space-y-2">
-                      {buildScenarios(selected).map((scenario, i) => (
-                        <div key={scenario.title} className="rounded-xl bg-blue-50 p-3">
-                          <div className="text-xs font-semibold text-blue-900">
-                            {i + 1}. {scenario.title}
-                          </div>
-                          <p className="mt-1 text-xs leading-relaxed text-blue-800">"{scenario.message}"</p>
+                        <div className="mt-5 flex items-center gap-2 text-slate-900">
+                          <FaLightbulb className="h-4 w-4 text-slate-400" />
+                          <h3 className="text-sm font-semibold">추천 마케팅 시나리오</h3>
                         </div>
-                      ))}
-                    </div>
+                        <div className="mt-2 space-y-2">
+                          {insight.scenarios.map((scenario, i) => (
+                            <div key={scenario.title} className="rounded-xl bg-blue-50 p-3">
+                              <div className="text-xs font-semibold text-blue-900">
+                                {i + 1}. {scenario.title}
+                              </div>
+                              <p className="mt-1 text-xs leading-relaxed text-blue-800">"{scenario.message}"</p>
+                            </div>
+                          ))}
+                        </div>
 
-                    <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-500">
-                      <strong className="text-slate-700">Human-in-the-loop:</strong> 이 제안은 규칙 기반으로
-                      생성되었습니다. 최종 발송 전 담당 직원의 검토 및 승인이 필요합니다.
-                    </p>
+                        <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs leading-relaxed text-slate-500">
+                          <strong className="text-slate-700">Human-in-the-loop:</strong> 이 제안은 AI(LLM)가
+                          생성했습니다. 최종 발송 전 담당 직원의 검토 및 승인이 필요합니다.
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               )}
