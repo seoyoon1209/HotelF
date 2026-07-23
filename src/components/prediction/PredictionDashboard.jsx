@@ -59,11 +59,7 @@ function PredictionDashboard() {
 
     const q = query.trim().toLowerCase();
     if (q) {
-      list = list.filter(
-        (r) =>
-          r.reservation_code.toLowerCase().includes(q) ||
-          (r.customer_name ?? "").toLowerCase().includes(q)
-      );
+      list = list.filter((r) => r.reservation_code.toLowerCase().includes(q));
     }
 
     list = [...list].sort((a, b) => {
@@ -151,7 +147,7 @@ function PredictionDashboard() {
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by reservation number or customer name"
+                  placeholder="Search by reservation number"
                   className="w-full rounded-full border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
