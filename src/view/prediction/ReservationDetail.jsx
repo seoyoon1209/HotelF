@@ -1,4 +1,25 @@
 //Reservation detail + simulator
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import {
+  FaArrowLeft,
+  FaCheck,
+  FaLightbulb,
+  FaMagnifyingGlassChart,
+  FaPlay,
+  FaTicket,
+  FaWandMagicSparkles,
+} from "react-icons/fa6";
+import PredictionBadge from "src/components/prediction/PredictionBadge";
+import { useToast } from "src/components/prediction/ToastProvider";
+import { usePredictionFilters } from "src/view/prediction/PredictionFilterContext";
+import { estimateCost, simulateProbability } from "src/data/predictionDemoData";
+import { createPrediction } from "src/api/predictionApi";
+import { getAiInsight } from "src/api/aiInsightApi";
+import { createReservationAction, deleteReservationActions } from "src/api/reservationActionApi";
+import { DEPOSIT_LABEL, MEAL_LABEL, SEGMENT_LABEL } from "src/data/labels";
+import LoadingState from "src/components/common/LoadingState";
+import { formatUSD } from "src/data/currency";
 
 const COMBOS = [
   { key: "none", title: "Do Nothing", discountPercent: 0, breakfastCoupon: false },
