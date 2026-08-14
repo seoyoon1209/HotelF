@@ -1,13 +1,11 @@
-# Hoteling — AI Powered Hotel Booking Cancellation Decision Support
+# Hoteling
 
-**Team Name:** Team ECHO
-**Project Name:** Hoteling
+## Hotel Cancellation Prediction
 
----
+### Executive Summary
 
-## Project Description
+Hoteling developed an AI service platform that predicts whether a hotel reservation is likely to be canceled. For hotel operators, reservation cancellations are a major source of uncertainty that directly affects occupancy and revenue. As soon as a new reservation is received, the platform analyzes a wide range of historical and external data to estimate the probability of cancellation. These predictions enable hotel managers to optimize overbooking strategies based on expected cancellation rates. Ultimately, the platform helps maximize occupancy, improve operational efficiency, and increase overall profitability.
 
-### Problem Statement
 
 Hotel booking cancellations create uncertainty in room inventory management, customer service, room resale planning, and expected revenue. When hotel staff manage many reservations at the same time, it can be difficult to consistently determine which bookings require attention first.
 
